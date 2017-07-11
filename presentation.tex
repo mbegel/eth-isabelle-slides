@@ -1,0 +1,81 @@
+\documentclass{beamer}
+
+\usetheme{Data61}
+
+\title{Program logic for terminating semantic of Ethereum bytecode}
+\author{Myriam Begel}
+\date{14 August 2017}
+%\institute{ENS Cachan, Computer Science department}
+%\subtitle{Verification}
+
+\begin{document}
+
+\maketitle
+
+%\D61sectionframe{Bouh}
+% alternatively use \frame[plain]{\titlepage}
+%\frame[plain]{\D61section}
+
+\section{Context}
+
+\begin{frame}{Ethereum}
+	\begin{itemize}
+		\item Blockchain
+		\item Not only cryptocurrency
+		\item Smart contracts : program running on a (Turing-complete) VM
+	\end{itemize}
+	\# picture
+\end{frame}
+
+\begin{frame}{Ethereum Virtual Machine}
+	\#insert few lines of opcodes \\
+	Differences with JVM - ARM
+	\begin{itemize}
+		\item Termination by gas (each instruction consumes gas, when 0 abort the execution)
+		\item Dynamic Jump
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Goal}
+	Contribute to a framework to specify and verify smart contracts
+	\begin{itemize}
+		\item Eth Foundation has interest in formal verification
+		\item Most of smart contracts are critical (finance, crowd-funding)
+	\end{itemize}
+	At the level of bytecode
+	\begin{itemize}
+		\item No gap in the trusted chain
+		\item Strong garanty
+		\item Main programing language = current weak point
+		\item All programing languages handled
+	\end{itemize}
+	\#diagram with compilation schema, what we don't want to trust ...
+\end{frame}
+
+\begin{frame}{State of the art}
+	\begin{itemize}
+		\item Eth Foundation has interest in formal verification
+		\item Yoichi Hirai wrote the specification of the EVM in Isabelle
+		\item He worked on a program logic
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{The problem we solve}
+	\begin{itemize}
+		\item Program logic too weak
+		\item Hoare triple valid if the post condition holds \alert{at some point} in the execution
+		\item Origin of the problem : program's semantic terminates after a given number of state
+		$\rightarrow$ in the definition of the triple existential on this number
+	\end{itemize}
+	Solution : use of a terminating semantic based on the gas
+\end{frame}
+
+\section{Contribution}
+
+\begin{frame}{Program logic}
+	
+\end{frame}
+% \part \partpage not implemented yet
+% thanks/question page not implemented
+
+\end{document}
