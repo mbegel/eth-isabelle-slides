@@ -1,0 +1,59 @@
+\documentclass{beamer}
+
+\usetheme{Data61}
+
+\title{Data61 \LaTeX{} beamer Template}
+\author{Guido Governatori}
+% \institute, \subtitle are not implemented yet
+
+\begin{document}
+
+\maketitle
+% alternatively use \frame[plain]{\titlepage}
+
+\begin{frame}[fragile]{Limitations}
+	\begin{itemize}
+		\item Title page: \verb|\institute|, \verb|\subtitle| not implemented
+		\item Sectioning, divisions: sectioning is not supported; \verb|\part|, \verb|\partpage| 
+				not implemented yet.
+		\item Slides/frame title: try to use short title. Subtitles are not implemented (the second 
+		    line is required for longish slide titles) 
+		\item Widescreen not implemented yet
+	\end{itemize}
+\end{frame}
+
+%slide 
+\begin{frame}{Slide title}
+  \begin{itemize}
+    \item first
+    \item second
+    \item third
+    \begin{itemize}
+      \item sub
+			\begin{itemize}
+				\item third level
+			\end{itemize}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Second slide}
+  \begin{enumerate}
+    \item first
+    \item second
+    \item third
+    \begin{enumerate}
+      \item \alert{alert} 
+      \item \structure{structure}
+			\begin{enumerate}
+				\item third $\Gamma\Delta\gamma$
+				\item second third
+			\end{enumerate}
+    \end{enumerate}
+  \end{enumerate}
+\end{frame}
+
+% \part \partpage not implemented yet
+% thanks/question page not implemented
+
+\end{document}
