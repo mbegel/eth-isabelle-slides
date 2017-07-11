@@ -1,0 +1,12 @@
+*.pdf
+*.log
+*.out
+*.aux
+*.gz
+*.vrb
+*.toc
+*.snm
+*.nav
+*.png
+.hgtags
+.hg_archival.txt
