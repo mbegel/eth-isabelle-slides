@@ -8,5 +8,8 @@
 *.snm
 *.nav
 *.png
+*.bbl
+*.blg
 .hgtags
 .hg_archival.txt
+.nfs*
