@@ -14,13 +14,8 @@
 \pgfdeclareimage[height=36pt]{CSIROLogoBlack}{art/CSIROLogo.png}
 %\pgfdeclareimage{Data61patternBlack}{}
 \pgfdeclareimage[height=.9\textheight]{Data61patternGreen}{art/ArtworkGreen.png}
-\pgfdeclareimage[height=.9\textheight]{Data61patternWhiteSection}{art/SmallArtworkWhite.png}
-
 
 \logo{\pgfuseimage{Data61Logo}}
-
-\newcommand{\insertinst}{ $\vert$ \insertinstitute}
-
 
 \titlegraphic{
 \begin{pgfpicture}{0pt}{0pt}{362pt}{272pt}
@@ -29,11 +24,10 @@
   \pgftext[at=\pgfpoint{20pt}{255pt},top,left]{\pgfuseimage{Data61LogoBlack}}
   \pgftext[at=\pgfpoint{20pt}{110pt},left]{%
     \begin{beamercolorbox}[wd=.65\paperwidth,leftskip=0pt]{title}
-      {\LARGE\bfseries\inserttitle} \\
-      \insertsubtitle
+      \LARGE\bfseries\inserttitle
     \end{beamercolorbox}
   }
-  \pgftext[at=\pgfpoint{20pt}{60pt},left]{\color{white}{\bfseries\insertauthor}{\small\insertinst}}
+  \pgftext[at=\pgfpoint{20pt}{60pt},left]{\bfseries\color{white}\insertauthor}
   \pgftext[at=\pgfpoint{20pt}{45pt},left]{\color{white}\insertdate}
   \pgftext[at=\pgfpoint{20pt}{10pt},left,bottom]{\small\color{Data61 green}www.data61.csiro.au}
 \end{pgfpicture}
@@ -45,36 +39,3 @@
 \useoutertheme{Data61}
 
 \renewcommand{\maketitle}{\frame[plain]{\titlepage}}
-
-\newcommand{\D61section}[3]{%
-  \ifthenelse{\equal{#2}{}}{%
-    \section{#1}%
-  }{%
-    \section[#2]{#1}%
-  }%
-  \D61sectionframe{#1}{#2}{#3}%
-}
-
-\newcommand{\D61sectionframe}[3]{%
-  %\colorlet{xhdcolor}{#1}%
-  \setbeamertemplate{background canvas}{%
-    \setlength{\unitlength}{\paperwidth/\thebmrW}%
-    \begin{pgfpicture}{0pt}{0pt}{362pt}{272pt}
-  \pgftext[at=\pgfpoint{364pt}{274pt},top,right]{\pgfuseimage{Data61patternGreen}}
-  \pgftext[at=\pgfpoint{354pt}{10pt},bottom,right]{\pgfuseimage{CSIROLogoBlack}}
-  \pgftext[at=\pgfpoint{20pt}{255pt},top,left]{\pgfuseimage{Data61LogoBlack}}
-  \pgftext[at=\pgfpoint{20pt}{110pt},left]{%
-    \begin{beamercolorbox}[wd=.65\paperwidth,leftskip=0pt]{title}
-      {\LARGE\bfseries#1} \\
-      #2
-    \end{beamercolorbox}
-  }
-  \pgftext[at=\pgfpoint{20pt}{60pt},left]{\color{white}\bfseries #3}
-  %\pgftext[at=\pgfpoint{20pt}{45pt},left]{\color{white}\insertdate}
-  %\pgftext[at=\pgfpoint{20pt}{10pt},left,bottom]{\small\color{Data61 green}www.data61.csiro.au}
-\end{pgfpicture}
-  }
-  \begin{frame}[plain,c]
-  \end{frame}
-  \resetbackgroundcanvas{}
-}
