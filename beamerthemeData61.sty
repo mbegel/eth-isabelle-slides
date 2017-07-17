@@ -14,6 +14,8 @@
 \pgfdeclareimage[height=36pt]{CSIROLogoBlack}{art/CSIROLogo.png}
 %\pgfdeclareimage{Data61patternBlack}{}
 \pgfdeclareimage[height=.9\textheight]{Data61patternGreen}{art/ArtworkGreen.png}
+\pgfdeclareimage[width=\paperwidth]{Data61patternWhite}{art/ArtworkWhite.png}
+
 
 \logo{\pgfuseimage{Data61Logo}}
 
@@ -33,9 +35,22 @@
 \end{pgfpicture}
 }
 
+
 \usecolortheme{Data61}
 %\usefonttheme{Data61}
 \useinnertheme{Data61}
 \useoutertheme{Data61}
 
 \renewcommand{\maketitle}{\frame[plain]{\titlepage}}
+\renewcommand{\partpage}{
+	\begin{pgfpicture}{0pt}{0pt}{362pt}{272pt}
+		\begin{beamercolorbox}[wd=\paperwidth,ht=\paperheight]{part page}
+			\pgftext[at=\pgfpoint{364pt}{274pt},top,right]{\pgfuseimage{Data61patternWhite}}
+			\pgftext[at=\pgfpoint{20pt}{110pt},left]{%
+				\begin{beamercolorbox}[wd=.65\paperwidth,leftskip=0pt]{part}
+					\LARGE\bfseries\insertpart
+				\end{beamercolorbox}
+			}
+		\end{beamercolorbox}
+	\end{pgfpicture}
+}
