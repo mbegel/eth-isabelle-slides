@@ -20,14 +20,14 @@
 %\frame[plain]{\D61section}
 
 \part{Context}
-\frame{\partpage}
+\frame[plain]{\partpage}
 
 \begin{frame}{Ethereum}
 	\begin{columns}[c]
 		\column{.6\textwidth}
 		\begin{itemize}
 			\item Blockchain platform
-			\item Not only cryptocurrency
+			\item Much more than a cryptocurrency
 			\item Smart contracts : program running on a (Turing-complete) VM
 		\end{itemize}
 		\column{.4\textwidth}
@@ -38,7 +38,7 @@
 \begin{frame}{Ethereum Virtual Machine \footnotesize{\cite{wood2014ethereum}}}
 	\begin{columns}[c]
 		\column{.6\textwidth}
-		Differences with JVM - ARM
+		Most striking differences to JVM - ARM
 		\begin{itemize}
 			\item Termination by gas
 			\item Dynamic JUMP
@@ -59,7 +59,7 @@
 
 \begin{frame}{Goal}
 	Most of smart contracts are critical (finance, ownership, ...)\\
-	$\Rightarrow$ we contribute to a framework to specify and verify smart contracts
+	$\Rightarrow$ we contribute to a framework to formally specify and verify smart contracts
 	\\ ~ \\
 	\textbf{State of the art} \\
 	EVM defined for Isabelle \cite{hirai2017defining} with a program logic inspired by \cite{Myreen09}
@@ -88,13 +88,13 @@
 \end{frame}
 
 \part{Contribution}
-\frame{\partpage}
+\frame[plain]{\partpage}
 
 \begin{frame}{Program logic}
 	Terminating semantic : not compositional\\
 	$\Rightarrow$ define 3 levels for the program logic
 	\\~\\
-	At the instruction and sequential level : use non terminating semantic with a \alert{defined} number of steps \\
+	At the instruction and sequential level : use non terminating semantic with a \alert{defined} number of steps\\ (= number of instructions)\\
 	At the top level : use terminating semantic
 	\\~\\
 	Only few rules for instructions\\
@@ -130,12 +130,12 @@
 		&	3	&	\color{Data61 green}JUMPDEST&\\
 		&	4	&	MLOAD&\\
 		&	5	&	POP&\\
-		\uncover<5->{3}&	6	&	\color{Data61 green}JUMP&	\uncover<5->{Jump}\\
+		\uncover<5->{3}&	\uncover<-4>{6}	&	\uncover<-4>{\color{Data61 green}JUMP}&	\uncover<5->{Jump}\\
 			\hline
 		&	7	&	DUP3&\\
 		&	8	&	PUSH 0&\\
 		&	10	&	ISZERO&\\
-		\uncover<5->{7}&	11	&	\color{Data61 green}JUMPI&	\uncover<5->{Jumpi}\\
+		\uncover<5->{7}&	\uncover<-4>{11}	&	\uncover<-4>{\color{Data61 green}JUMPI}&	\uncover<5->{Jumpi}\\
 			\hline
 		&	12	&	POP&\\
 		\uncover<5->{12}&	13	&	\color{Data61 green}RETURN&	\uncover<5->{No}\\
@@ -264,7 +264,7 @@
 \end{frame}
 
 \part{Future work}
-\frame{\partpage}
+\frame[plain]{\partpage}
 
 \begin{frame}{Real example}
 	\begin{itemize}
