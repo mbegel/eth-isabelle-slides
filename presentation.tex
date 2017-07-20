@@ -11,17 +11,24 @@
 %\subtitle{Verification}
 \bibliographystyle{apalike}
 
-\begin{document}
+\newlength{\textlarg}
+\newcommand{\barre}[1]{%
+	\settowidth{\textlarg}{#1}
+	#1\hspace{-\textlarg}{\color{Data61 green}\rule[0.5ex]{\textlarg}{0.6pt}}}
 
+\begin{document}
+%%1
 \maketitle
 
 %\D61sectionframe{Bouh}
 % alternatively use \frame[plain]{\titlepage}
 %\frame[plain]{\D61section}
 
+%%2
 \part{Context}
-\frame[plain]{\partpage}
+\frame{\partpage}
 
+%%3
 \begin{frame}{Ethereum}
 	\begin{columns}[c]
 		\column{.6\textwidth}
@@ -35,6 +42,7 @@
 	\end{columns}
 \end{frame}
 
+%%4
 \begin{frame}{Ethereum Virtual Machine \footnotesize{\cite{wood2014ethereum}}}
 	\begin{columns}[c]
 		\column{.6\textwidth}
@@ -57,6 +65,7 @@
 	\end{columns}
 \end{frame}
 
+%%5
 \begin{frame}{Goal}
 	Most of smart contracts are critical (finance, ownership, ...)\\
 	$\Rightarrow$ we contribute to a framework to formally specify and verify smart contracts
@@ -65,176 +74,208 @@
 	EVM defined for Isabelle \cite{hirai2017defining} with a program logic inspired by \cite{Myreen09}
 \end{frame}
 
+%%6
 \begin{frame}{Verification}
 	At the bytecode level
 	\begin{itemize}
-		\item Strong garanty
+		\item Strong garantees
 		\item No gap in the trusted chain
 		\item Current weak point = Solidity
-		\item Several programming language
+		\item Several programing languages
 	\end{itemize}
 \end{frame}
 
+%%7
 \begin{frame}{Problem}
-	\textbf{Program logic too weak}\\
-	$\{P\}c\{Q\}$ if $Q$ holds \alert{at some point} in the execution of $c$
+	\textbf{"\only<3>{\barre{Non}} \only<1-2>{Non~} terminating" semantic }\\
+	$\vdash\{P\}c\{Q\}$ if $Q$ holds \only<1-2>{\alert{at some point} in}\only<3>{{\color{Data61 green}at the end} of} the execution of $c$
+	\\~\\	
+	$\texttt{triple}\texttt{ pre insts post }==$\\
+	$~\forall \texttt{co\_ctx presult rest. no\_assertion co\_ctx }\rightarrow$\\
+	$~\quad\texttt{(pre ** code insts ** rest)}$\\
+	$~\qquad\texttt{(instruction\_result\_as\_set co\_ctx presult)} \rightarrow$\\
+	$~\quad($
+	\only<1-2>{~$\alert{\exists} \texttt{\alert{k.}}$}
+	\only<3>{\barre{$\exists \texttt{k.}$}}
+	$\texttt{(post ** code insts ** rest)}$\\
+	$~\qquad\texttt{(instruction\_result\_as\_set co\_ctx}$\\
+	\only<1-2>{$~\qquad\quad\texttt{(program\_sem~~ co\_ctx ~\alert{k} presult)))}$}
+	\only<3>{$~\qquad\quad\texttt{(program\_sem{\color{Data61 green}\_t} co\_ctx \barre{k} presult)))}$}
 	\\~\\
-	\textbf{Origin of the problem}\\
-	program's semantic terminates after a given number of steps \\
-	$\rightarrow$ in the definition of the triple existential on this number
-	\\~\\
-	\textbf{Solution}\\
-	Terminating semantic based on the gas written by Sidney \& Maksym
+	\uncover<2>{\textbf{We can do better}\\}
+	\uncover<3>{Termination of $\texttt{program\_sem\_t}$ proved by Sidney \& Maksym}
 \end{frame}
 
-\part{Contribution}
-\frame[plain]{\partpage}
+%%8
+\part{Contributions}
+\frame{\partpage}
 
+%%9
 \begin{frame}{Program logic}
 	Terminating semantic : not compositional\\
 	$\Rightarrow$ define 3 levels for the program logic
-	\\~\\
-	At the instruction and sequential level : use non terminating semantic with a \alert{defined} number of steps\\ (= number of instructions)\\
-	At the top level : use terminating semantic
-	\\~\\
-	Only few rules for instructions\\
-	Tested on toy examples
+	\begin{itemize}
+		\item<2-> Instructions ${\color{Data61 green}\vdash_{inst}}$
+			\begin{itemize}
+				\item one rule per instruction
+				\item<5-> non-terminating semantic with 1 step
+			\end{itemize}
+		\item<3-> Sequential block ${\color{Data61 plum}\vdash_{seq}}$
+			\begin{itemize}
+				\item unroll list of instructions
+				\item<5-> non-terminating semantic with $n$ steps \\ $n=$ number of instructions
+			\end{itemize}
+		\item<4-> Connect blocks ${\color{Data61 ocean blue}\vdash_{blocks}}$
+			\begin{itemize}
+				\item jumps from one block to another
+				\item<6-> terminating semantic
+			\end{itemize}
+	\end{itemize}
+	\uncover<7>{Tested on toy examples\\}
+	\uncover<7>{Limitation : for now rules for few instructions}
 \end{frame}
 
-
+%%10
 \begin{frame}{Sequential blocks}
 	\centering
 	\only<-3>{
 	\begin{tabular}{c r l c}
 		&	\uncover<2->{0}	&	OR&\\
 		&	\uncover<2->{1}	&	ADD&\\
-		\uncover<5->{0}&	\uncover<2->{2}	&	SWAP1& 	\uncover<5->{Next}\\
+		\uncover<4->{0}&	\uncover<2->{2}	&	SWAP1& 	\uncover<4->{Next}\\
 		&	\uncover<2->{3}	&	\color<3->{Data61 green}JUMPDEST&\\
 		&	\uncover<2->{4}	&	MLOAD&\\
 		&	\uncover<2->{5}	&	POP&\\
-		\uncover<5->{3}&	\uncover<2->{6}	&	\color<3->{Data61 green}JUMP& 	\uncover<5->{Jump}\\
+		\uncover<4->{3}&	\uncover<2->{6}	&	\color<3->{Data61 green}JUMP& 	\uncover<4->{Jump}\\
 		&	\uncover<2->{7}	&	DUP3&\\
 		&	\uncover<2->{8}	&	PUSH 0&\\
 		&	\uncover<2->{10}	&	ISZERO&\\
-		\uncover<5->{7}&	\uncover<2->{11}	&	\color<3->{Data61 green}JUMPI& 	\uncover<5->{Jumpi}\\
+		\uncover<4->{7}&	\uncover<2->{11}	&	\color<3->{Data61 green}JUMPI& 	\uncover<4->{Jumpi}\\
 		&	\uncover<2->{12}	&	POP&\\
-		\uncover<5->{11}&	\uncover<2->{13}	&	\color<3->{Data61 green}RETURN& 	\uncover<5->{No}\\
-		\uncover<5->{14}&	\uncover<2->{14}	&	AND	& 	\uncover<5->{Next}
+		\uncover<4->{11}&	\uncover<2->{13}	&	\color<3->{Data61 green}RETURN& 	\uncover<4->{No}\\
+		\uncover<4->{14}&	\uncover<2->{14}	&	AND	& 	\uncover<4->{Next}
 	\end{tabular}}
+\setbeamercovered{transparent}
 	\only<4->{
 	\begin{tabular}{c r l c}
 		&	0	&	OR&\\
 		&	1	&	ADD&\\
-		\uncover<5->{0}&	2	&	SWAP1& 	\uncover<5->{Next}\\
+		\visible<5->{0}&	2	&	SWAP1& 	\visible<5->{Next}\\
 			\hline
 		&	3	&	\color{Data61 green}JUMPDEST&\\
 		&	4	&	MLOAD&\\
 		&	5	&	POP&\\
-		\uncover<5->{3}&	\uncover<-4>{6}	&	\uncover<-4>{\color{Data61 green}JUMP}&	\uncover<5->{Jump}\\
+		\visible<5->{3}&	\uncover<-4>{6}	&	\uncover<-4>{\color{Data61 green}JUMP}&	\visible<5->{Jump}\\
 			\hline
 		&	7	&	DUP3&\\
 		&	8	&	PUSH 0&\\
 		&	10	&	ISZERO&\\
-		\uncover<5->{7}&	\uncover<-4>{11}	&	\uncover<-4>{\color{Data61 green}JUMPI}&	\uncover<5->{Jumpi}\\
+		\visible<5->{7}&	\uncover<-4>{11}	&	\uncover<-4>{\color{Data61 green}JUMPI}&	\visible<5->{Jumpi}\\
 			\hline
 		&	12	&	POP&\\
-		\uncover<5->{12}&	13	&	\color{Data61 green}RETURN&	\uncover<5->{No}\\
+		\visible<5->{12}&	13	&	\color{Data61 green}RETURN&	\visible<5->{No}\\
 			\hline
-		\uncover<5->{14}&	14	&	AND	& 	\uncover<5->{Next}
+		\visible<5->{14}&	14	&	AND	& 	\visible<5->{Next}
 	\end{tabular}}
 \end{frame}
-
-\begin{frame}{Rule for PUSH}
+\setbeamercovered{}
+%%11
+\begin{frame}{Rule for POP}
 	\begin{align*}
-		{\color{Data61 green}\vdash}&\\
-		\{&{\color{Data61 plum}\langle h \leq 1023 \wedge \texttt{length lst} > 0 \wedge 32 \geq \texttt{length lst} \wedge}\\
-		&{\color{Data61 plum}\texttt{Gverylow} \leq g \wedge m \geq 0 \rangle}~ \wedge^* \\
+		{\color{Data61 green}\vdash_{inst}}&\\
+		\{&{\color{Data61 plum}\langle h \leq 1023 \wedge 0 < \texttt{length lst} \leq 32 \wedge \texttt{Gbase} \leq g \rangle}~ \wedge^*\\
 		&{\color{Data61 dark mint}\texttt{continuing }} \wedge^*
 		{\color{Data61 vermillion}\texttt{program-counter n }} \wedge^*
-		{\color{Data61 ocean blue}\texttt{memory-usage m }} \wedge^* \\
-		&{\color{Data61 gold}\texttt{gas-pred g }} \wedge^*
-		{\color{Data61 fuchsia}\texttt{stack-height h }} \wedge^*
-		{\color{Data61 light forest}\texttt{rest}}\}\\
-		(&\texttt{n, PUSH lst}) \\
-		\{&{\color{Data61 dark mint}\texttt{continuing }} \wedge^*
-		{\color{Data61 vermillion}\texttt{program-counter (n + 1 + length lst) }} \wedge^*\\
-		&{\color{Data61 ocean blue}\texttt{memory-usage m }} \wedge^*
-		{\color{Data61 gold}\texttt{gas-pred (g - Gverylow) }} \wedge^*\\
+		{\color{Data61 gold}\texttt{gas-pred g }} \wedge^*\\
 		&{\color{Data61 fuchsia}\texttt{stack-height (Suc h) }} \wedge^*
 		{\color{Data61 fuchsia}\texttt{stack h lst }} \wedge^*
+		{\color{Data61 light forest}\texttt{rest}}
+		\}\\
+		(&\texttt{n, POP}) \\
+		\{&{\color{Data61 dark mint}\texttt{continuing }} \wedge^*
+		{\color{Data61 vermillion}\texttt{program-counter (n + 1) }} \wedge^*\\
+		&{\color{Data61 gold}\texttt{gas-pred (g - Gbase) }} \wedge^*
+		{\color{Data61 fuchsia}\texttt{stack-height h }} \wedge^*
 		{\color{Data61 light forest}\texttt{rest}}\}
 	\end{align*}
 \end{frame}
 
-\begin{frame}{Rules for sequential instructions}
-	\[\frac{{\color{Data61 green}\vdash} \{P\} x \{R\}
-		\qquad {\color{Data61 plum}\vdash} \{R\} xs \{Q\}}
-	{{\color{Data61 plum}\vdash} \{P\} (x\#xs) \{Q\}}\]
+%%12
+\begin{frame}{Rules for a sequential block}
+	\[\frac{{\color{Data61 green}\vdash_{inst}} \{P\} x \{R\}
+		\qquad {\color{Data61 plum}\vdash_{seq}} \{R\} xs \{Q\}}
+	{{\color{Data61 plum}\vdash_{seq}} \{P\} (x\#xs) \{Q\}}\]
 
 	\[\frac{\bigwedge s.~P~s~\rightarrow~Q~s}
-	{{\color{Data61 plum}\vdash} \{P\} [~] \{Q\}}\]
+	{{\color{Data61 plum}\vdash_{seq}} \{P\} [~] \{Q\}}\]
 \end{frame}
 
+%%13
 \begin{frame}{Rule for No and Next blocks}
-	\[\frac{{\color{Data61 plum}\vdash} \{P\} xs \{Q\}}
-	{{\color{Data61 ocean blue}\vdash_b} \{P\} (n,xs,No) \{Q\}}\]
+	\[\frac{{\color{Data61 plum}\vdash_{seq}} \{P\} xs \{Q\}}
+	{\texttt{blocks~}{\color{Data61 ocean blue}\vdash_{blocks}} \{P\} (n,xs,No) \{Q\}}\]
 
-	\small
-	\[\frac{{\color{Data61 plum}\vdash} \{P\} xs \{\texttt{pc } m \wedge^* R\}
-		\quad \texttt{block b m = (ys,t)}
-		\quad {\color{Data61 ocean blue}\vdash_b} \{\texttt{pc } m \wedge^* R\} (m,ys,t) \{Q\}}
-	{{\color{Data61 ocean blue}\vdash_b} \{P\} (n,xs,Next) \{Q\}}\]
+	~\\~\\
+	\centering
+	$\frac{{\color{Data61 plum}\vdash_{seq}} \{P\} xs \{\texttt{pc } m \wedge^* R\}
+		\quad \texttt{(m,ys,t)}\in \texttt{blocks}
+		\quad \texttt{blocks~}{\color{Data61 ocean blue}\vdash_{blocks}} \{\texttt{pc } m \wedge^* R\} (m,ys,t) \{Q\}}
+	{\texttt{blocks~}{\color{Data61 ocean blue}\vdash_{blocks}} \{P\} (n,xs,Next) \{Q\}}$
 \end{frame}
 
-\begin{frame}{Rule for Jump block}
+%%14
+\begin{frame}{Rule for a Jump block}
 	\footnotesize
-	$$\frac{{\color{Data61 plum}\vdash} \{P\} xs \{R1\}
+	$$\frac{{\color{Data61 plum}\vdash_{seq}} \{P\} xs \{R1\}
 	\quad \begin{aligned}
-	&\texttt{block b m = (ys,t)}\\
+	&\texttt{(m,ys,t)}\in \texttt{blocks}\\
 	&\texttt{hd ys = (m, JUMPDEST)}\\
 	\end{aligned}
-	\quad {\color{Data61 ocean blue}\vdash_b} \{R2\} (m,ys,t) \{Q\}}
-	{{\color{Data61 ocean blue}\vdash_b} \{P\} (n,xs,Jump) \{Q\}}$$
+	\quad \texttt{blocks~} {\color{Data61 ocean blue}\vdash_{blocks}} \{R2\} (m,ys,t) \{Q\}}
+	{\texttt{blocks~}{\color{Data61 ocean blue}\vdash_{blocks}} \{P\} (n,xs,Jump) \{Q\}}$$
 	\small
+	\uncover<2>{
 	\begin{align*}
-	R1 = ~& {\color{Data61 plum}\langle h \leq 1023 \wedge \color{Data61 plum}\texttt{Gmid} \leq g \wedge m \geq 0 \rangle}~ \wedge^* \\
-	&{\color{Data61 dark mint}\texttt{continuing }} \wedge^*
-	{\color{Data61 vermillion}\texttt{program-counter (n + inst-size-list xs) }}\wedge^*\\
-	&{\color{Data61 ocean blue}\texttt{memory-usage k }} \wedge^*
+	R1 = ~& {\color{Data61 plum}\langle h \leq 1023 \wedge \color{Data61 plum}\texttt{Gmid} \leq g \rangle}~ \wedge^* 
+	{\color{Data61 dark mint}\texttt{continuing }} \wedge^*
 	{\color{Data61 gold}\texttt{gas-pred g }} \wedge^*\\
+	&{\color{Data61 vermillion}\texttt{program-counter (n + inst-size-list xs) }}\wedge^*\\
 	&{\color{Data61 fuchsia}\texttt{stack-height (Suc h) }} \wedge^*
 	{\color{Data61 fuchsia}\texttt{stack h m }} \wedge^*
 	{\color{Data61 light forest}\texttt{rest}}\\
 	\end{align*}
 	\begin{align*}
 	R2 = ~&{\color{Data61 dark mint}\texttt{continuing }} \wedge^*
-	{\color{Data61 vermillion}\texttt{program-counter m }}\wedge^*
-	{\color{Data61 ocean blue}\texttt{memory-usage k }} \wedge^*\\
-	&{\color{Data61 gold}\texttt{gas-pred (g - Gmid) }} \wedge^*
+	{\color{Data61 gold}\texttt{gas-pred (g - Gmid) }} \wedge^*\\
+	&{\color{Data61 vermillion}\texttt{program-counter m }}\wedge^*
 	{\color{Data61 fuchsia}\texttt{stack-height h }} \wedge^*
 	{\color{Data61 light forest}\texttt{rest}}\\
 	\end{align*}
+	}
 \end{frame}
 
-\begin{frame}{Rule for Jumpi block}
+%%15
+\begin{frame}{Rule for a Jumpi block}
 	\footnotesize
-	$$\frac{
+	\hspace*{-20pt}
+	$\tfrac{
 		\begin{aligned}
-		&\texttt{hd ys = (m, JUMPDEST)}\\
-		& \texttt{block b m = (ys,t)}
-		&c \neq 0 \rightarrow {\color{Data61 ocean blue}\vdash_b} \{\texttt{pc } m \wedge^* R2\} (m,ys,t) \{Q\}
+		\texttt{hd }&\texttt{ys = (m, JUMPDEST)}&\\
+		& \texttt{(m,ys,t)}\in \texttt{bl}
+		&c \neq 0 \rightarrow \texttt{bl}{\color{Data61 ocean blue}\vdash_{blocks}} \{\texttt{pc } m \wedge^* R2\} (m,ys,t) \{Q\}
 		\\
-		{\color{Data61 plum}\vdash} \{P\} xs \{R1\} \quad
-		&\texttt{block b p = (zs,t')}
-		&c=0 \rightarrow{\color{Data61 ocean blue}\vdash_b} \{\texttt{pc } p \wedge^* R2\} (p,zs,t') \{Q\}
+		{\color{Data61 plum}\vdash_{seq}} \{P\} xs \{R1\} \quad
+		&\texttt{(p,zs,t')}\in \texttt{bl}
+		&c=0 \rightarrow\texttt{bl}{\color{Data61 ocean blue}\vdash_{blocks}} \{\texttt{pc } p \wedge^* R2\} (p,zs,t') \{Q\}
 		\end{aligned}
 		}
-	{{\color{Data61 ocean blue}\vdash_b} \{P\} (n,xs,Jumpi) \{Q\}}$$
+	{\begin{aligned}\texttt{bl~}{\color{Data61 ocean blue}\vdash_{blocks}} \{P\} (n,xs,Jumpi) \{Q\}\end{aligned}}$
+	\
+	\uncover<2>{
 	\begin{align*}
-	R1 = ~& {\color{Data61 plum}\langle h \leq 1022 \wedge \color{Data61 plum}\texttt{Ghigh} \leq g \wedge m \geq 0 \rangle}~ \wedge^* \\
-	&{\color{Data61 dark mint}\texttt{continuing }} \wedge^*
-	{\color{Data61 vermillion}\texttt{program-counter (p - 1) }}\wedge^*\\
-	&{\color{Data61 ocean blue}\texttt{memory-usage k }} \wedge^*
+	R1 = ~& {\color{Data61 plum}\langle h \leq 1022 \wedge \color{Data61 plum}\texttt{Ghigh} \leq g \rangle}~ \wedge^*
+	{\color{Data61 dark mint}\texttt{continuing }} \wedge^*\\
+	&{\color{Data61 vermillion}\texttt{program-counter (p - 1) }}\wedge^*
 	{\color{Data61 gold}\texttt{gas-pred g }} \wedge^*\\
 	&{\color{Data61 fuchsia}\texttt{stack-height (h + 2) }} \wedge^*
 	{\color{Data61 fuchsia}\texttt{stack (h+1) m }} \wedge^*
@@ -243,38 +284,50 @@
 	\end{align*}
 	\begin{align*}
 	R2 = ~&{\color{Data61 dark mint}\texttt{continuing }} \wedge^*
-	{\color{Data61 ocean blue}\texttt{memory-usage k }} \wedge^*\\
-	&{\color{Data61 gold}\texttt{gas-pred (g - Ghigh) }} \wedge^*
-	{\color{Data61 fuchsia}\texttt{stack-height h }} \wedge^*
+	{\color{Data61 gold}\texttt{gas-pred (g - Ghigh) }} \wedge^*\\
+	&{\color{Data61 fuchsia}\texttt{stack-height h }} \wedge^*
 	{\color{Data61 light forest}\texttt{rest}}\\
 	\end{align*}
+	}
 \end{frame}
 
-\begin{frame}{Sound and well-formed}
-	\begin{block}{Sound}
-		\begin{align*}\texttt{well-formed b }{\color{Data61 ocean blue}\vdash_b} \texttt{\{P\} }&\texttt{(n,xs,Jumpi) \{Q\}}\\
-		\Longrightarrow
-		\texttt{well-formed b }{\color{Data61 ocean blue}\Vdash_b} \texttt{\{P\} }&\texttt{(n,xs,Jumpi) \{Q\}}
-		\end{align*}
-	${\color{Data61 ocean blue}\Vdash_b}$ = terminating semantic for blocks
-	\end{block}
-	\begin{block}{Well-formed}
-		\[\texttt{well-formed (build-blocks bytecode)}\]
-	\end{block}
+%%16
+\begin{frame}{Soundness}
+	\[\frac{
+		\begin{gathered}
+			0< \# \texttt{bytecode} < 2^{256} \\
+			\texttt{build-blocks bytecode }{\color{Data61 ocean blue}\vdash_{blocks}} \texttt{\{P\} (fst-block) \{Q\}}
+		\end{gathered}}
+	{{\color{Data61 dark mint}\Vdash} \texttt{\{P\} (set bytecode) \{Q\}}}
+	\]
+	${\color{Data61 dark mint}\Vdash}$ = terminating semantic
 \end{frame}
 
+%%17
+\begin{frame}{Summary - contributions}
+	\begin{itemize}
+		\item Defined function splitting bytecode into basic blocks in Isabelle
+		\item Showed that function well-formed blocks
+		\item Defined program logic for terminating semantics
+		\item Proved soundness of program logic w.r.t. bytecode semantics
+	\end{itemize}
+\end{frame}
+
+%%18
 \part{Future work}
-\frame[plain]{\partpage}
+\frame{\partpage}
 
+%%19
 \begin{frame}{Real example}
 	\begin{itemize}
 		\item Write more rules for instructions
-		\item Complete the soundness proof where needed
+		\item Complete the soundness proof for them
 		\item Specify a more complex example
 		\item Prove it correct
 	\end{itemize}
 \end{frame}
 
+%%20
 \begin{frame}{Control flow graph}
 	CFG was the initial goal\\
 	BUT not possible with dynamic jumps\\
@@ -286,6 +339,8 @@
 		\item More structure program
 	\end{itemize}
 \end{frame}
+
+\frame[plain]{\thankspage{}{}{}{myriam.begel@ens-paris-saclay.fr}{}}
 
 % \part \partpage not implemented yet
 % thanks/question page not implemented
