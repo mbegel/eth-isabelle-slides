@@ -54,3 +54,25 @@
 		\end{beamercolorbox}
 	\end{pgfpicture}
 }
+%\thankspage{Division/Unit Name}{Presenter Title}{Telephone number}{CSIRO Email address}{Website}
+\newcommand{\thankspage}[5]{
+	\begin{beamercolorbox}[wd=\paperwidth,ht=\paperheight]{title page}
+		\begin{pgfpicture}{0pt}{0pt}{362pt}{272pt}
+			\pgftext[at=\pgfpoint{364pt}{274pt},top,right]{\pgfuseimage{Data61patternGreen}}
+			\pgftext[at=\pgfpoint{354pt}{10pt},bottom,right]{\pgfuseimage{CSIROLogoBlack}}
+			\pgftext[at=\pgfpoint{20pt}{255pt},top,left]{\pgfuseimage{Data61LogoBlack}}
+			\pgftext[at=\pgfpoint{20pt}{130pt},left]{%
+				\begin{beamercolorbox}[wd=.65\paperwidth,leftskip=0pt]{title}
+					\huge\bfseries Thank you
+				\end{beamercolorbox}
+			}
+			\pgftext[at=\pgfpoint{20pt}{100pt},left]{\small\bfseries\color{white}#1}
+			\pgftext[at=\pgfpoint{20pt}{90pt},left]{\small\color{white}\insertauthor}
+			\pgftext[at=\pgfpoint{20pt}{80pt},left]{\small\color{white}#2}
+			\pgftext[at=\pgfpoint{20pt}{80pt},left]{\small\color{white}#3}
+			\pgftext[at=\pgfpoint{20pt}{80pt},left]{\small\color{white}#4}
+			\pgftext[at=\pgfpoint{20pt}{80pt},left]{\small\color{white}#5}
+			\pgftext[at=\pgfpoint{20pt}{10pt},left,bottom]{\small\color{Data61 green}www.data61.csiro.au}
+		\end{pgfpicture}
+	\end{beamercolorbox}
+}
