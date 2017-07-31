@@ -132,7 +132,7 @@
 			\end{itemize}
 	\end{itemize}
 	\uncover<7>{Tested on toy examples\\}
-	\uncover<7>{Limitation : for now rules for few instructions}
+	\uncover<7>{Limitation : only 24/69 instructions specified}
 \end{frame}
 
 %%10
@@ -183,20 +183,20 @@
 \begin{frame}{Rule for POP}
 	\begin{align*}
 		{\color{Data61 green}\vdash_{inst}}&\\
-		\{&{\color{Data61 plum}\langle h \leq 1023 \wedge 0 < \texttt{length lst} \leq 32 \wedge \texttt{Gbase} \leq g \rangle}~ \wedge^*\\
-		&{\color{Data61 dark mint}\texttt{continuing }} \wedge^*
-		{\color{Data61 vermillion}\texttt{program-counter n }} \wedge^*
-		{\color{Data61 gold}\texttt{gas-pred g }} \wedge^*\\
-		&{\color{Data61 fuchsia}\texttt{stack-height (Suc h) }} \wedge^*
-		{\color{Data61 fuchsia}\texttt{stack h lst }} \wedge^*
-		{\color{Data61 light forest}\texttt{rest}}
+		\{&{\color<2>{Data61 plum}\langle h \leq 1023 \wedge \texttt{Gbase} \leq g \rangle}~ \wedge^*\\
+		&{\color<3>{Data61 dark mint}\texttt{continuing }} \wedge^*
+		{\color<4>{Data61 vermillion}\texttt{program-counter n }} \wedge^*
+		{\color<5>{Data61 gold}\texttt{gas-pred g }} \wedge^*\\
+		&{\color<6>{Data61 fuchsia}\texttt{stack-height (Suc h) }} \wedge^*
+		{\color<6>{Data61 fuchsia}\texttt{stack h x }} \wedge^*
+		{\color<7>{Data61 light forest}\texttt{rest}}
 		\}\\
 		(&\texttt{n, POP}) \\
-		\{&{\color{Data61 dark mint}\texttt{continuing }} \wedge^*
-		{\color{Data61 vermillion}\texttt{program-counter (n + 1) }} \wedge^*\\
-		&{\color{Data61 gold}\texttt{gas-pred (g - Gbase) }} \wedge^*
-		{\color{Data61 fuchsia}\texttt{stack-height h }} \wedge^*
-		{\color{Data61 light forest}\texttt{rest}}\}
+		\{&{\color<3>{Data61 dark mint}\texttt{continuing }} \wedge^*
+		{\color<4>{Data61 vermillion}\texttt{program-counter (n + 1) }} \wedge^*\\
+		&{\color<5>{Data61 gold}\texttt{gas-pred (g - Gbase) }} \wedge^*
+		{\color<6>{Data61 fuchsia}\texttt{stack-height h }} \wedge^*
+		{\color<7>{Data61 light forest}\texttt{rest}}\}
 	\end{align*}
 \end{frame}
 
@@ -206,7 +206,7 @@
 		\qquad {\color{Data61 plum}\vdash_{seq}} \{R\} xs \{Q\}}
 	{{\color{Data61 plum}\vdash_{seq}} \{P\} (x\#xs) \{Q\}}\]
 
-	\[\frac{\bigwedge s.~P~s~\rightarrow~Q~s}
+	\[\frac{\forall s.~P~s~\rightarrow~Q~s}
 	{{\color{Data61 plum}\vdash_{seq}} \{P\} [~] \{Q\}}\]
 \end{frame}
 
@@ -310,14 +310,24 @@
 		\item Showed that function well-formed blocks
 		\item Defined program logic for terminating semantics
 		\item Proved soundness of program logic w.r.t. bytecode semantics
+		\item Write a VCG to automatize proof
 	\end{itemize}
 \end{frame}
 
 %%18
+\begin{frame}{Benefits}
+	\begin{itemize}
+		\item No witness for the number of steps at the beginning of a proof
+		\item Easier to use
+		\item Automation 
+	\end{itemize}
+\end{frame}
+
+%%19
 \part{Future work}
 \frame{\partpage}
 
-%%19
+%%20
 \begin{frame}{Real example}
 	\begin{itemize}
 		\item Write more rules for instructions
@@ -327,7 +337,7 @@
 	\end{itemize}
 \end{frame}
 
-%%20
+%%21
 \begin{frame}{Control flow graph}
 	CFG was the initial goal\\
 	BUT not possible with dynamic jumps\\
@@ -340,6 +350,7 @@
 	\end{itemize}
 \end{frame}
 
+%%22
 \frame[plain]{\thankspage{}{}{}{myriam.begel@ens-paris-saclay.fr}{}}
 
 % \part \partpage not implemented yet
