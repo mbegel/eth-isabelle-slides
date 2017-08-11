@@ -1,8 +1,13 @@
 \documentclass{beamer}
 
 \usepackage{mathtools}
-
+\usepackage{pgf}
+\usepackage{tikz}
+\usepackage[normalem]{ulem}
 \usetheme{Data61}
+\renewcommand{\t}[1]{\texttt{#1}}
+
+\input{0header}
 
 \title{Program logic for terminating semantic of Ethereum bytecode}
 \author{Myriam Begel}
@@ -12,17 +17,97 @@
 \bibliographystyle{apalike}
 
 \newlength{\textlarg}
-\newcommand{\barre}[1]{%
-	\settowidth{\textlarg}{#1}
-	#1\hspace{-\textlarg}{\color{Data61 green}\rule[0.5ex]{\textlarg}{0.6pt}}}
+
+%Tikz
+\usetikzlibrary{arrows,automata}
+\usetikzlibrary{positioning}
+\tikzset{
+	state/.style={
+		rectangle,
+		rounded corners,
+		very thick,
+		minimum height=2em,
+		inner sep=2pt,
+		text centered,node distance=1.3cm,
+	},
+}
+
+\newcommand{\stkout}[1]{\textcolor{Data61 green}{\ifmmode\text{\sout{\ensuremath{#1}}}\else\sout{#1}\fi}}
 
 \begin{document}
 %%1
 \maketitle
 
-%\D61sectionframe{Bouh}
-% alternatively use \frame[plain]{\titlepage}
-%\frame[plain]{\D61section}
+
+\begin{frame}{Overview}
+	\centering
+\begin{tikzpicture}[->,>=stealth']
+
+% Position of QUERY 
+% Use previously defined 'state' as layout (see above)
+% use tabular for content to get columns/rows
+% parbox to limit width of the listing
+%Myreen's word
+
+\node[state, 	% layout (defined above)
+text width=10cm, 	% max text width
+anchor=center,
+draw=Data61 green] (Myreen) 
+{\textcolor{Data61 green}{Program logic for machine code \cite{Myreen09}}};
+
+% Hirai's work
+\uncover<2->{
+\node[state,    	% layout (defined above)
+text width=10cm, 	% max text width
+below of=Myreen, 	% Position is to the right of QUERY
+anchor=center,
+draw=Data61 plum
+] (Hirai) 	% posistion relative to the center of the 'box'
+{%
+\color{Data61 plum}Implementation for EVM \cite{hirai2017defining}
+};
+\path (Myreen) 	edge 	(Hirai);}
+
+% Terminating program logic
+\uncover<3->{
+\node[state,
+below of=Hirai,
+text width=10cm, 	% max text width
+anchor=center,
+draw=Data61 vermillion
+] (Terminating) 
+{\color{Data61 vermillion}
+	Terminating program logic for EVM
+};
+\path (Hirai)     	edge 	(Terminating);}
+
+% Inductive rules
+\uncover<4->{
+\node[state,
+below of=Terminating,
+text width=10cm, 	% max text width
+anchor=center,
+draw=Data61 ocean blue
+] (Logic) 
+{\color{Data61 ocean blue}
+Inductive rules sound with respect to terminating logic
+};
+\path (Terminating)	edge	(Logic);}
+
+% Automation
+\uncover<5->{
+\node[state,
+below of=Logic,
+text width=10cm,	% max text width
+anchor=center,
+draw=Data61 ocean blue
+] (Auto) 
+{\color{Data61 ocean blue} Automation of proofs and example
+};
+\path(Logic)       	edge  	(Auto);}
+
+\end{tikzpicture}
+\end{frame}
 
 %%2
 \part{Context}
@@ -66,7 +151,7 @@
 \end{frame}
 
 %%5
-\begin{frame}{Goal}
+\begin{frame}{Goal = trustworthy contracts}
 	Most of smart contracts are critical (finance, ownership, ...)\\
 	$\Rightarrow$ we contribute to a framework to formally specify and verify smart contracts
 	\\ ~ \\
@@ -87,21 +172,23 @@
 
 %%7
 \begin{frame}{Problem}
-	\textbf{"\only<3>{\barre{Non}} \only<1-2>{Non~} terminating" semantic }\\
+	\textbf{"\only<3>{\stkout{Non}} \only<1-2>{Non~} terminating" semantic }\\
 	$\vdash\{P\}c\{Q\}$ if $Q$ holds \only<1-2>{\alert{at some point} in}\only<3>{{\color{Data61 green}at the end} of} the execution of $c$
-	\\~\\	
-	$\texttt{triple}\texttt{ pre insts post }==$\\
-	$~\forall \texttt{co\_ctx presult rest. no\_assertion co\_ctx }\rightarrow$\\
-	$~\quad\texttt{(pre ** code insts ** rest)}$\\
-	$~\qquad\texttt{(instruction\_result\_as\_set co\_ctx presult)} \rightarrow$\\
-	$~\quad($
-	\only<1-2>{~$\alert{\exists} \texttt{\alert{k.}}$}
-	\only<3>{\barre{$\exists \texttt{k.}$}}
-	$\texttt{(post ** code insts ** rest)}$\\
-	$~\qquad\texttt{(instruction\_result\_as\_set co\_ctx}$\\
-	\only<1-2>{$~\qquad\quad\texttt{(program\_sem~~ co\_ctx ~\alert{k} presult)))}$}
-	\only<3>{$~\qquad\quad\texttt{(program\_sem{\color{Data61 green}\_t} co\_ctx \barre{k} presult)))}$}
-	\\~\\
+
+	\begin{align*}
+	\t{triple }&{ P~ c~ Q }\equiv\qquad\small{(*~c \t{ is a set of bytes}*)}\\
+	&~\forall cctx~ ir~ R.\\
+	&\quad{(P \wedge^* \t{code } c \wedge^* R)}\\
+	&\qquad(\t{inst\_result\_as\_set } cctx~ ir) \Rightarrow\\
+	&\quad
+	\only<1-2>{~\alert{\exists} \alert{k.}}
+	\only<3>{\stkout{\textcolor{black}{\exists k.}}}
+	(Q \wedge^* \t{code }c \wedge^* R)\\
+	&\qquad(\t{inst\_result\_as\_set }cctx~
+	\only<1-2>{(\t{program\_sem   } cctx~ \alert{k}~ir))}
+	\only<3>{(\t{program\_sem\textcolor{Data61 green}{\_t} } cctx~ \stkout{\textcolor{black}{k}}~ir))}
+	\end{align*}
+
 	\uncover<2>{\textbf{We can do better}\\}
 	\uncover<3>{Termination of $\texttt{program\_sem\_t}$ proved by Sidney \& Maksym}
 \end{frame}
@@ -131,8 +218,6 @@
 				\item<6-> terminating semantic
 			\end{itemize}
 	\end{itemize}
-	\uncover<7>{Tested on toy examples\\}
-	\uncover<7>{Limitation : only 24/69 instructions specified}
 \end{frame}
 
 %%10
@@ -152,7 +237,7 @@
 		&	\uncover<2->{10}	&	ISZERO&\\
 		\uncover<4->{7}&	\uncover<2->{11}	&	\color<3->{Data61 green}JUMPI& 	\uncover<4->{Jumpi}\\
 		&	\uncover<2->{12}	&	POP&\\
-		\uncover<4->{11}&	\uncover<2->{13}	&	\color<3->{Data61 green}RETURN& 	\uncover<4->{No}\\
+		\uncover<4->{11}&	\uncover<2->{13}	&	\color<3->{Data61 green}RETURN& 	\uncover<4->{Terminal}\\
 		\uncover<4->{14}&	\uncover<2->{14}	&	AND	& 	\uncover<4->{Next}
 	\end{tabular}}
 \setbeamercovered{transparent}
@@ -173,7 +258,7 @@
 		\visible<5->{7}&	\uncover<-4>{11}	&	\uncover<-4>{\color{Data61 green}JUMPI}&	\visible<5->{Jumpi}\\
 			\hline
 		&	12	&	POP&\\
-		\visible<5->{12}&	13	&	\color{Data61 green}RETURN&	\visible<5->{No}\\
+		\visible<5->{12}&	13	&	\color{Data61 green}RETURN&	\visible<5->{Terminal}\\
 			\hline
 		\visible<5->{14}&	14	&	AND	& 	\visible<5->{Next}
 	\end{tabular}}
@@ -206,14 +291,14 @@
 		\qquad {\color{Data61 plum}\vdash_{seq}} \{R\} xs \{Q\}}
 	{{\color{Data61 plum}\vdash_{seq}} \{P\} (x\#xs) \{Q\}}\]
 
-	\[\frac{\forall s.~P~s~\rightarrow~Q~s}
+	\[\frac{\forall s.~P~s~\Rightarrow~Q~s}
 	{{\color{Data61 plum}\vdash_{seq}} \{P\} [~] \{Q\}}\]
 \end{frame}
 
 %%13
-\begin{frame}{Rule for No and Next blocks}
+\begin{frame}{Rule for Terminal and Next blocks}
 	\[\frac{{\color{Data61 plum}\vdash_{seq}} \{P\} xs \{Q\}}
-	{\texttt{blocks~}{\color{Data61 ocean blue}\vdash_{blocks}} \{P\} (n,xs,No) \{Q\}}\]
+	{\texttt{blocks~}{\color{Data61 ocean blue}\vdash_{blocks}} \{P\} (n,xs,Terminal) \{Q\}}\]
 
 	~\\~\\
 	\centering
@@ -262,11 +347,11 @@
 		\begin{aligned}
 		\texttt{hd }&\texttt{ys = (m, JUMPDEST)}&\\
 		& \texttt{(m,ys,t)}\in \texttt{bl}
-		&c \neq 0 \rightarrow \texttt{bl}{\color{Data61 ocean blue}\vdash_{blocks}} \{\texttt{pc } m \wedge^* R2\} (m,ys,t) \{Q\}
+		&c \neq 0 \Rightarrow \texttt{bl}{\color{Data61 ocean blue}\vdash_{blocks}} \{\texttt{pc } m \wedge^* R2\} (m,ys,t) \{Q\}
 		\\
 		{\color{Data61 plum}\vdash_{seq}} \{P\} xs \{R1\} \quad
 		&\texttt{(p,zs,t')}\in \texttt{bl}
-		&c=0 \rightarrow\texttt{bl}{\color{Data61 ocean blue}\vdash_{blocks}} \{\texttt{pc } p \wedge^* R2\} (p,zs,t') \{Q\}
+		&c=0 \Rightarrow\texttt{bl}{\color{Data61 ocean blue}\vdash_{blocks}} \{\texttt{pc } p \wedge^* R2\} (p,zs,t') \{Q\}
 		\end{aligned}
 		}
 	{\begin{aligned}\texttt{bl~}{\color{Data61 ocean blue}\vdash_{blocks}} \{P\} (n,xs,Jumpi) \{Q\}\end{aligned}}$
@@ -293,34 +378,71 @@
 
 %%16
 \begin{frame}{Soundness}
-	\[\frac{
-		\begin{gathered}
-			0< \# \texttt{bytecode} < 2^{256} \\
-			\texttt{build-blocks bytecode }{\color{Data61 ocean blue}\vdash_{blocks}} \texttt{\{P\} (fst-block) \{Q\}}
-		\end{gathered}}
-	{{\color{Data61 dark mint}\Vdash} \texttt{\{P\} (set bytecode) \{Q\}}}
-	\]
-	${\color{Data61 dark mint}\Vdash}$ = terminating semantic
+	\begin{gather*}
+		0<  \vert\t{c}\vert < 2^{256} \Rightarrow\\
+		{\t{build\_blocks }c~{\color{Data61 ocean blue}\vdash_\t{blocks}} \{P\}~(fst\_block)~\{Q\}}\Rightarrow\\
+		{\color{Data61 dark mint}\Vdash} \{P\}~(\t{set } c)~\{Q\}
+	\end{gather*}
+	${\color{Data61 dark mint}\Vdash}$ = terminating semantic for bytecode
+\end{frame}
+
+\begin{frame}{Verification of a simple contract}
+		\ttfamily
+		\footnotesize
+	\begin{columns}[c]
+		\column{.46\textwidth}
+		\textcolor{Data61 ocean blue}{contract} D \{ \\
+		\quad	\textcolor{Data61 midnight blue}{uint} owner;\\
+		\quad	\textcolor{Data61 midnight blue}{mapping(uint $\Rightarrow$ uint)} addrs;\\
+			
+		\quad	\textcolor{Data61 ocean blue}{function} D(\textcolor{Data61 midnight blue}{uint} v) \{\\
+		\quad\quad	owner = uint(msg.sender);\\
+		\quad\quad	addrs[owner] = v;\\
+		\quad	\}\\
+		\quad	\textcolor{Data61 ocean blue}{function} dispatch1(\textcolor{Data61 midnight blue}{uint} a)\\
+		\quad	\textcolor{Data61 ocean blue}{returns} (\textcolor{Data61 midnight blue}{uint}) \{\\
+		\quad\quad	return a;\\
+		\quad	\}\\
+		\quad	\textcolor{Data61 ocean blue}{function} dispatch2()\\
+		\quad	\textcolor{Data61 ocean blue}{returns} (\textcolor{Data61 midnight blue}{uint}) \{\\
+		\quad\quad	{return} (2);\\
+		\quad	\}\\
+		\}\\
+		
+		\column{.6\textwidth}
+		\textcolor{Data61 dark mint}{definition} return$\_$action' ::\\
+		"32 word $\Rightarrow$ 256 word $\Rightarrow$ contract$\_$action" \textcolor{Data61 dark mint}{where}\\
+		"return$\_$action' hash x = \\
+		(\textcolor{Data61 dark mint}{if} hash = dispatch1$\_$hash \textcolor{Data61 dark mint}{then}\\
+		ContractReturn x)\\
+		\textcolor{Data61 dark mint}{else} (\textcolor{Data61 dark mint}{if} hash = dispatch2$\_$hash \textcolor{Data61 dark mint}{then}\\
+		ContractReturn 2\\
+		\textcolor{Data61 dark mint}{else} ContractFail [ShouldNotHappen]))"
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Proof automation}
+	\footnotesize
+	\ttfamily
+	\textcolor{Data61 dark mint}{lemma}:\\
+	"$\exists$ r. triple \\
+	(program$\_$counter 0 $\wedge^*$ stack$\_$height 0 $\wedge^*$ sent$\_$data hash $\wedge^*$ sent$\_$value x $\wedge^*$
+	memory$\_$usage 0 $\wedge^*$ continuing $\wedge^*$ gas$\_$pred 3000 $\wedge^*$ memory 64 x) $\wedge^*$
+	memory 96 y)\\
+	D\\
+	(action (return$\_$action' z x) $\wedge^*$ r)"
 \end{frame}
 
 %%17
 \begin{frame}{Summary - contributions}
 	\begin{itemize}
 		\item Defined function splitting bytecode into basic blocks in Isabelle
-		\item Showed that function well-formed blocks
+		\item Showed that function forms well-formed blocks
 		\item Defined program logic for terminating semantics
 		\item Proved soundness of program logic w.r.t. bytecode semantics
 		\item Write a VCG to automatize proof
 	\end{itemize}
-\end{frame}
 
-%%18
-\begin{frame}{Benefits}
-	\begin{itemize}
-		\item No witness for the number of steps at the beginning of a proof
-		\item Easier to use
-		\item Automation 
-	\end{itemize}
 \end{frame}
 
 %%19
@@ -328,25 +450,24 @@
 \frame{\partpage}
 
 %%20
-\begin{frame}{Real example}
+\begin{frame}{Specification of other contracts}
 	\begin{itemize}
-		\item Write more rules for instructions
+		\item Write rules for all the instructions
 		\item Complete the soundness proof for them
-		\item Specify a more complex example
-		\item Prove it correct
+		\item Specification of more complex contract
 	\end{itemize}
 \end{frame}
 
 %%21
 \begin{frame}{Control flow graph}
 	CFG was the initial goal\\
-	BUT not possible with dynamic jumps\\
-	HOWEVER proposition to change the EVM with static jumps and explicit function calls
+	BUT problems with dynamic jumps\\
+	HOWEVER proposition of static jumps and explicit function calls for EVM 1.5
 	\\~\\
 	\begin{itemize}
 		\item Add edges to our blocks
 		\item Detect loops
-		\item More structure program
+		\item More structured program
 	\end{itemize}
 \end{frame}
 

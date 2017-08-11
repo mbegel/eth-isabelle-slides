@@ -1,0 +1,123 @@
+\documentclass{beamer}
+
+\usetheme{Data61}
+
+\title{Hoare triple for bytecode}
+\author{Myriam Begel}
+% \institute, \subtitle are not implemented yet
+
+\begin{document}
+
+\maketitle
+% alternatively use \frame[plain]{\titlepage}
+
+%slide 
+\part{Standard logic}
+\frame{\partpage}
+\begin{frame}{Hoare triple}
+	\[\texttt{triple pre insts post}\]
+	means\\
+	{\color{Data61 green}Starting from any state where \texttt{pre} holds}, {\color{Data61 plum}we can reach a state where \texttt{post} holds} {\color{Data61 vermillion}after the execution of instructions from \texttt{insts}}
+\end{frame}
+
+\begin{frame}{More technically}
+	$\texttt{triple}\texttt{ pre insts post }==$\\
+	$~\forall \texttt{co\_ctx presult rest stopper. no\_assertion co\_ctx }\rightarrow$\\
+	\color{Data61 green}
+	$~\quad\texttt{(pre ** {\color{Data61 vermillion}code insts} ** rest)}$\\
+	$~\qquad\texttt{(instruction\_result\_as\_set co\_ctx presult)} \rightarrow$\\
+	\color{Data61 plum}
+	$~\quad($
+	{$\exists \texttt{k.}$}
+	$\texttt{(post ** {\color{Data61 vermillion}code insts} ** rest)}$\\
+	$~\qquad\texttt{(instruction\_result\_as\_set co\_ctx}$\\
+	{$~\qquad\quad\texttt{(program\_sem stopper co\_ctx k presult)))}$}\\
+	\begin{itemize}
+		\item $\texttt{co\_ctx}$ represents the whole code of the program and contains \texttt{insts}
+		\item \texttt{presult} describes a state of the execution that can be separate into \texttt{pre} and \texttt{rest}
+		\item after the execution of k instructions, we reach a state that can be separate into \texttt{post} and \texttt{rest}
+	\end{itemize}		
+\end{frame}
+
+\begin{frame}{A state of the execution}
+	A set with different kind of elements such as (in EVM):
+	\begin{itemize}
+		\item Program counter
+		\item Remaining gas
+		\item Height of the stack
+		\item Elements of the stack
+		\item Memory usage
+		\item Elements of the memory
+		\item Gas limit
+		\item ...
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Example for one instruction}
+	\begin{align*}
+	{\vdash}&\\
+	\{&{\color{Data61 plum}\langle h \leq 1023 \wedge 0 < \texttt{length lst} \leq 32 \wedge \texttt{Gbase} \leq g \rangle}~ \wedge^*\\
+	&{\color{Data61 dark mint}\texttt{continuing }} \wedge^*
+	{\color{Data61 vermillion}\texttt{program-counter n }} \wedge^*
+	{\color{Data61 gold}\texttt{gas-pred g }} \wedge^*\\
+	&{\color{Data61 fuchsia}\texttt{stack-height (Suc h) }} \wedge^*
+	{\color{Data61 fuchsia}\texttt{stack h lst }} \wedge^*
+	{\color{Data61 light forest}\texttt{rest}}
+	\}\\
+	(&\texttt{n, POP}) \\
+	\{&{\color{Data61 dark mint}\texttt{continuing }} \wedge^*
+	{\color{Data61 vermillion}\texttt{program-counter (n + 1) }} \wedge^*\\
+	&{\color{Data61 gold}\texttt{gas-pred (g - Gbase) }} \wedge^*
+	{\color{Data61 fuchsia}\texttt{stack-height h }} \wedge^*
+	{\color{Data61 light forest}\texttt{rest}}\}
+	\end{align*}
+\end{frame}
+
+\begin{frame}{Example}
+	\begin{columns}[l l l]
+		\begin{column}{0.25\textwidth}
+			   	PUSH 60\\ 
+			   PUSH 40\\ 
+			   ISZERO\\ 
+			   PUSH [tag] 2\\ 
+			   JUMPI\\ 
+			   PUSH 0\\ 
+			   DUP1\\ 
+			   REVERT\\ 
+			   tag 2\\ 
+			   JUMPDEST\\ 
+			   CALLER\\ 
+			   DUP1\\ 
+			   JUMP [in]\\ 
+			   tag 3\\ 
+			   JUMPDEST\\ 
+		\end{column}
+		\begin{column}{0.25\textwidth}
+			  POP\\ 
+			PUSH [tag] 13\\ 
+			JUMP\\ 
+			tag 9\\ 
+			JUMPDEST\\ 
+			PUSH [tag] 10\\ 
+			JUMP\\ 
+			tag 10\\ 
+			JUMPDEST\\ 
+			PUSH 40\\ 
+			SWAP1\\ 
+			RETURN\\ 
+			tag 13\\ 
+			JUMPDEST\\ 
+			STOP
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			triple \{pc 0 ** stack-height 0\} c \{$\langle$ p=29 or 31 $\rangle$ ** pc p ** spec \}\\~\\
+			triple \{pc 0 ** stack-height 0 ** continuing\} c \{ not-continuing ** spec\}\\~\\
+			triple \{pc 0 ** stack-height 0\} c \{action ContractReturn x ** spec\}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+% \part \partpage not implemented yet
+% thanks/question page not implemented
+
+\end{document}
