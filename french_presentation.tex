@@ -1,0 +1,542 @@
+\documentclass{beamer}
+
+\usepackage{mathtools}
+\usepackage{pgf}
+\usepackage{tikz}
+\usepackage[normalem]{ulem}
+\usetheme{Data61}
+\renewcommand{\t}[1]{\texttt{#1}}
+\usepackage[frenchb]{babel}
+
+\input{0header}
+
+\title{Logique de programme pour le bytecode d'Ethereum}
+\author{Myriam B\'{e}gel}
+\date{5 Septembre 2017}
+%\institute{ENS Cachan, Computer Science department}
+%\subtitle{Verification}
+\bibliographystyle{apalike}
+
+\newlength{\textlarg}
+
+%Tikz
+\usetikzlibrary{arrows,automata}
+\usetikzlibrary{positioning}
+\tikzset{
+	state/.style={
+		rectangle,
+		rounded corners,
+		very thick,
+		minimum height=2em,
+		inner sep=2pt,
+		text centered,
+node distance=1.3cm,
+	},
+}
+\renewcommand{\ULthickness}{2pt}
+
+\newcommand{\stkout}[1]{
+	\textcolor{Data61 green}{
+		\ifmmode\text{\sout{\ensuremath{#1}}}
+		\else\sout{#1}\fi}}
+
+\newcommand{\triple}[3]{\{#1\}~#2~\{#3\}}
+\newcommand{\Dtriple}[3]{\vDash\{#1\}~#2~\{#3\}}
+\newcommand{\ttriple}[3]{[#1]~#2~[#3]}
+\newcommand{\tinst}[3]{{\color{Data61 green}\vdash_{inst}}\ttriple{#1}{#2}{#3}}
+\newcommand{\tseq}[3]{{\color{Data61 plum}\vdash_{seq}}\ttriple{#1}{#2}{#3}}
+\newcommand{\tblocks}[4]{#1{\color{Data61 ocean blue}\vdash_{blocks}}\ttriple{#2}{#3}{#4}}
+
+
+\begin{document}
+%%1
+\maketitle
+
+
+\begin{frame}{Vue d'ensemble}
+	\centering
+\begin{tikzpicture}[->,>=stealth']
+
+% Position of QUERY 
+% Use previously defined 'state' as layout (see above)
+% use tabular for content to get columns/rows
+% parbox to limit width of the listing
+%Myreen's word
+
+\node[state, 	% layout (defined above)
+text width=10cm, 	% max text width
+anchor=center,
+draw=Data61 green] (Myreen) 
+{\textcolor{Data61 green}{S\'{e}mantique pour code-machine \cite{Myreen09}}};
+
+% Hirai's work
+\uncover<2->{
+\node[state,    	% layout (defined above)
+text width=10cm, 	% max text width
+below of=Myreen, 	% Position is to the right of QUERY
+anchor=center,
+draw=Data61 plum
+] (Hirai) 	% posistion relative to the center of the 'box'
+{%
+\color{Data61 plum}Impl\'{e}mentation pour Ethereum \cite{hirai2017defining}
+};
+\path (Myreen) 	edge 	(Hirai);}
+
+% Terminating program logic
+\uncover<3->{
+\node[state,
+below of=Hirai,
+text width=10cm, 	% max text width
+anchor=center,
+draw=Data61 vermillion
+] (Terminating) 
+{\color{Data61 vermillion}
+	Correction totale pour Ethereum
+};
+\path (Hirai)     	edge 	(Terminating);}
+
+% Inductive rules
+\uncover<4->{
+\node[state,
+below of=Terminating,
+text width=10cm, 	% max text width
+anchor=center,
+draw=Data61 ocean blue
+] (Logic) 
+{\color{Data61 ocean blue}
+	Logique de programme correcte par rapport \`{a} la correction totale
+};
+\path (Terminating)	edge	(Logic);}
+
+% Automation
+\uncover<5->{
+\node[state,
+below of=Logic,
+text width=10cm,	% max text width
+anchor=center,
+draw=Data61 ocean blue
+] (Auto) 
+{\color{Data61 ocean blue} Preuves automatiques et exemple
+};
+\path(Logic)       	edge  	(Auto)
+;}
+
+\end{tikzpicture}
+\end{frame}
+
+%%2
+\part{Contexte}
+\frame{\partpage}
+
+%%3
+\begin{frame}{Ethereum}
+	\begin{columns}[c]
+		\column{.6\textwidth}
+		\begin{itemize}
+			\item Une blockchain
+			\item Bien plus que de la monnaie virtuelle
+			\item \textit{Contrats intelligents} : programmes ex\'{e}cut\'{e}es par une machine virtuelle Turing compl\`{e}te
+		\end{itemize}
+		\column{.4\textwidth}
+		\includegraphics[scale=0.3]{Figures/ETHEREUM-LOGO_PORTRAIT_Black_small.png}
+	\end{columns}
+\end{frame}
+
+%%4
+\begin{frame}{Machine Virtuelle d'Ethereum (EVM) \footnotesize{\cite{wood2014ethereum}}}
+	\begin{columns}[c]
+		\column{.6\textwidth}
+		Quelques diff\'{e}rences avec JVM et ARM
+		\begin{itemize}
+			\item Terminaison par \textit{gas}
+			\item JUMP dynamiques
+		\end{itemize}
+		\column{.4\textwidth}
+		\begin{tabular}{r l}
+			1 & \texttt{JUMPI} \\
+			2 & \texttt{PUSH~20}\\
+			4 & \texttt{PUSH~10}\\
+			6 & \texttt{JUMP}\\
+			7 & \texttt{JUMPDEST}\\
+			8 & \texttt{PUSH~30}\\
+			10 & \texttt{JUMPDEST}\\
+			11 & \texttt{JUMP}
+		\end{tabular}
+	\end{columns}
+\end{frame}
+
+%%5
+\begin{frame}{But = contrats fiables}
+	La plupart des contrats sont critiques (finance, propri\'{e}t\'{e}, ...)\\
+	$\Rightarrow$ contribution \`{a} un projet open-source pour formellement sp\'{e}cifier et v\'{e}rifier les contrats
+	\\ ~ \\
+	\textbf{\'{E}tat de l'art} \\
+	EVM d\'{e}fini en \textit{Isabelle} \cite{hirai2017defining} et une logique de Hoare inspir\'{e}e de \cite{Myreen09}
+\end{frame}
+
+%%6
+\begin{frame}{V\'{e}rification}
+	Au niveau du bytecode
+	\begin{itemize}
+		\item Garanties fortes
+		\item Pas de trou dans la cha\^{i}ne de confiance
+%		\item Point faible actuel = Solidity
+		\item Plusieurs langages de programmation
+	\end{itemize}
+\end{frame}
+
+%%7
+\begin{frame}{Probl\`{e}me}
+	\only<1-8>{\textbf{Correction partielle}\\
+	$\vDash\{P\}c\{Q\}$ si $Q$ valide \alert<1,6-7>{\`{a} un certain moment} dans l'ex\'{e}cution de $c$}
+	
+	\only<9->{\textbf{Correction \textcolor{Data61 green}{totale}}\\
+	${\color{Data61 dark mint}\vDash}[P]c[Q]$ si $Q$ valide {\color{Data61 green}\`{a} la fin} de l'ex\'{e}cution de $c$}
+
+	\begin{align*}
+	\only<1-8>{\vDash&\{P\}c\{Q\}\equiv\\}
+	\only<9>{{\color{Data61 dark mint}\vDash~}&[P]c[Q]\equiv\\}
+	&~\forall cctx~ ir~ R.\\
+	&\quad\alert<4>{(P \alert<2>{\wedge^*} \t{code } c \alert<2>{\wedge^*} R)}\\
+	&\qquad\alert<4>{(\t{inst\_result\_as\_set } \alert<3>{cctx~ ir})} \Rightarrow\\
+	&\quad
+	\only<1-8>{~\alert<7-8>{\exists k.}}
+	\only<9>{\stkout{\exists k.}}
+	\alert<6>{(Q \alert<2>{\wedge^*} \t{code }c \alert<2>{\wedge^*} R)}\\
+	&\qquad\alert<6>{(\t{inst\_result\_as\_set }cctx}~
+	\only<1-8>{\alert<5-6>{(\t{run }~~ cctx~ \alert<7-8>{k}~ir))}}
+	\only<9>{(\t{run\textcolor{Data61 green}{\_t} } cctx~ \stkout{k}~ir))}
+	\end{align*}
+
+	\uncover<8>{\textbf{On peut mieux faire}\\}
+	\uncover<9>{Terminaison de $\texttt{run\_t}$ prouv\'{e}es par mes coll\`{e}gues}
+\end{frame}
+
+%%8
+\part{Contributions}
+\frame{\partpage}
+
+%%9
+\begin{frame}{Logique de programme}
+	3 niveaux pour la logique \\
+%	\begin{columns}
+%		\column{.4\textwidth}
+	\begin{itemize}
+		\item<2-> Instructions ${\color{Data61 green}\vdash_{inst}}$
+			\begin{itemize}
+				\item une r\`{e}gle par instruction
+%				\item<5-> non-terminating semantic with 1 step
+			\end{itemize}
+		\item<3-> Un \textit{bloc s\'{e}quentiel} ${\color{Data61 plum}\vdash_{seq}}$
+			\begin{itemize}
+				\item d\'{e}rouler une liste d'instruction
+%				\item<5-> non-terminating semantic with $n$ steps \\ $n=$ number of instructions
+			\end{itemize}
+		\item<4-> Connecter les blocs ${\color{Data61 ocean blue}\vdash_{blocks}}$
+			\begin{itemize}
+				\item aller d'un bloc au suivant
+%				\item<6-> terminating semantic
+			\end{itemize}
+	\end{itemize}
+	\uncover<5>{
+	\begin{figure}
+		\[
+		\dfrac
+		{\dfrac
+			{\dfrac{}{\tinst{P}{hd~b}{R_1}}
+				\quad
+				\dfrac
+				{\dfrac{}{{\color{Data61 green}\vdash_{inst}} \sim} \quad
+					\dfrac{\dots}{{\color{Data61 plum}\vdash_{seq}} \sim}}
+				{\tseq{R_1}{tl~b}{R}}}
+			{\tseq{P}{b}{R}}
+			\quad \dfrac{\dots}{\tblocks{blocks}{R}{next~block}{Q}}}
+		{\tblocks{blocks}{P}{b}{Q}}\]
+	\end{figure}}
+\end{frame}
+
+%%10
+\begin{frame}{Bloc s\'{e}quentiel}
+	\uncover<4->{R\'{e}sultat de $\t{build\_blocks}$:\\}
+	\centering
+	\only<-2>{
+	\begin{tabular}{c r l c}
+		&	{0}	&	OR&\\
+		&	{1}	&	ADD&\\
+		\uncover<4->{0}&	{2}	&	SWAP1& 	\uncover<4->{Next}\\
+		&	{3}	&	\color<2->{Data61 green}JUMPDEST&\\
+		&	{4}	&	MLOAD&\\
+		&	{5}	&	POP&\\
+		\uncover<4->{3}&	{6}	&	\color<2->{Data61 green}JUMP& 	\uncover<4->{Jump}\\
+		&	{7}	&	DUP3&\\
+		&	{8}	&	PUSH 0&\\
+		&	{10}	&	ISZERO&\\
+		\uncover<4->{7}&	{11}	&	\color<2->{Data61 green}JUMPI& 	\uncover<4->{Jumpi}\\
+		&	{12}	&	POP&\\
+		\uncover<4->{11}&	{13}	&	\color<2->{Data61 green}RETURN& 	\uncover<4->{Terminal}\\
+		\uncover<4->{14}&	{14}	&	AND	& 	\uncover<4->{Next}
+	\end{tabular}}
+\setbeamercovered{transparent}
+	\only<3->{
+	\begin{tabular}{c r l c}
+		&	0	&	OR&\\
+		&	1	&	ADD&\\
+		\visible<4->{0}&	2	&	SWAP1& 	\visible<4->{Next}\\
+			\hline
+		&	3	&	\color{Data61 green}JUMPDEST&\\
+		&	4	&	MLOAD&\\
+		&	5	&	POP&\\
+		\visible<4->{3}&	\uncover<-3>{6}	&	\uncover<-3>{\color{Data61 green}JUMP}&	\visible<4->{Jump}\\
+			\hline
+		&	7	&	DUP3&\\
+		&	8	&	PUSH 0&\\
+		&	10	&	ISZERO&\\
+		\visible<4->{7}&	\uncover<-3>{11}	&	\uncover<-3>{\color{Data61 green}JUMPI}&	\visible<4->{Jumpi}\\
+			\hline
+		&	12	&	POP&\\
+		\visible<4->{12}&	13	&	\color{Data61 green}RETURN&	\visible<4->{Terminal}\\
+			\hline
+		\visible<4->{14}&	14	&	AND	& 	\visible<4->{Next}
+	\end{tabular}}
+\end{frame}
+\setbeamercovered{}
+%%11
+\begin{frame}{R\`{e}gle pour POP}
+	\begin{align*}
+		{\color{Data61 green}\vdash_{inst}}&\\
+		[&{\color<2>{Data61 plum}\langle h \leq 1023 \wedge 2 \leq g \rangle}~ \wedge^*\\
+		&{\color<3>{Data61 dark mint}\texttt{continuing }} \wedge^*
+		{\color<4>{Data61 vermillion}\texttt{program-counter n }} \wedge^*
+		{\color<5>{Data61 ocean blue}\texttt{gas-pred g }} \wedge^*\\
+		&{\color<6>{Data61 fuchsia}\texttt{stack-height (Suc h) }} \wedge^*
+		{\color<6>{Data61 fuchsia}\texttt{stack h x }} \wedge^*
+		{\color<7>{Data61 light forest}\texttt{rest}}
+		\\
+		(&\texttt{\textcolor<4>{Data61 vermillion}{n}, \textcolor<1>{Data61 light teal}{POP}}) \\
+		[&{\color<3>{Data61 dark mint}\texttt{continuing }} \wedge^*
+		{\color<4>{Data61 vermillion}\texttt{program-counter (n + 1) }} \wedge^*\\
+		&{\color<5>{Data61 ocean blue}\texttt{gas-pred (g - 2) }} \wedge^*
+		{\color<6>{Data61 fuchsia}\texttt{stack-height h }} \wedge^*
+		{\color<7>{Data61 light forest}\texttt{rest}}]
+	\end{align*}
+\end{frame}
+
+%%12
+\begin{frame}{R\`{e}gles pour un bloc s\'{e}quentiel}
+	\[\frac{{\color{Data61 green}\vdash_{inst}} [P] ~x~ [R]
+		\qquad {\color{Data61 plum}\vdash_{seq}} [R] ~xs~ [Q]}
+	{{\color{Data61 plum}\vdash_{seq}} [P] ~x\#xs~ [Q]}\]
+
+	\[\frac{\forall s.~P~s~\Rightarrow~Q~s}
+	{{\color{Data61 plum}\vdash_{seq}} [P] ~\t{Nil}~ [Q]}\]
+\end{frame}
+
+%%13
+\begin{frame}{R\`{e}gles pour les blocs Terminal et Next}
+	\[\frac{{\color{Data61 plum}\vdash_{seq}} [P] xs [Q]}
+	{\texttt{blocks~}{\color{Data61 ocean blue}\vdash_{blocks}} [P] (n,xs,Terminal) [Q]}\]
+
+	~\\~\\
+	\centering
+	$\frac{{\color{Data61 plum}\vdash_{seq}} [P] xs [\texttt{pc } m \wedge^* R]
+		\quad \texttt{(m,ys,t)}\in \texttt{blocks}
+		\quad \texttt{blocks~}{\color{Data61 ocean blue}\vdash_{blocks}} [\texttt{pc } m \wedge^* R] (m,ys,t) [Q]}
+	{\texttt{blocks~}{\color{Data61 ocean blue}\vdash_{blocks}} [P] (n,xs,Next) [Q]}$
+\end{frame}
+
+%%14
+\begin{frame}{R\`{e}gle pour un bloc Jump}
+	\footnotesize
+	$$\frac{{\color{Data61 plum}\vdash_{seq}} [P] xs [R1]
+	\quad \begin{aligned}
+	&\texttt{(m,ys,t)}\in \texttt{blocks}\\
+	&\texttt{hd ys = (m, JUMPDEST)}\\
+	\end{aligned}
+	\quad \texttt{blocks~} {\color{Data61 ocean blue}\vdash_{blocks}} [R2] (m,ys,t) [Q]}
+	{\texttt{blocks~}{\color{Data61 ocean blue}\vdash_{blocks}} [P] (n,xs,Jump) [Q]}$$
+	\small
+	\uncover<2>{
+	\begin{align*}
+	R1 = ~& {\color{Data61 plum}\langle h \leq 1023 \wedge \color{Data61 plum}8 \leq g \rangle}~ \wedge^* 
+	{\color{Data61 dark mint}\texttt{continuing }} \wedge^*
+	{\color{Data61 ocean blue}\texttt{gas-pred g }} \wedge^*\\
+	&{\color{Data61 vermillion}\texttt{program-counter p }}\wedge^*\\
+	&{\color{Data61 fuchsia}\texttt{stack-height (Suc h) }} \wedge^*
+	{\color{Data61 fuchsia}\texttt{stack h m }} \wedge^*
+	{\color{Data61 light forest}\texttt{rest}}\\
+	\end{align*}
+	\begin{align*}
+	R2 = ~&{\color{Data61 dark mint}\texttt{continuing }} \wedge^*
+	{\color{Data61 ocean blue}\texttt{gas-pred (g - 8) }} \wedge^*\\
+	&{\color{Data61 vermillion}\texttt{program-counter m }}\wedge^*
+	{\color{Data61 fuchsia}\texttt{stack-height h }} \wedge^*
+	{\color{Data61 light forest}\texttt{rest}}\\
+	\end{align*}
+	}
+\end{frame}
+
+%%15
+\begin{frame}{R\`{e}gle pour un bloc Jumpi}
+	\footnotesize
+	\hspace*{-20pt}
+	$\tfrac{
+		\begin{aligned}
+		\texttt{hd }&\texttt{ys = (m, JUMPDEST)}&\\
+		& \texttt{(m,ys,t)}\in \texttt{bl}
+		&c \neq 0 \Rightarrow \texttt{bl}{\color{Data61 ocean blue}\vdash_{blocks}} [\textcolor<2>{Data61 vermillion}{\t{pc } m} \wedge^* R2] (m,ys,t) [Q]
+		\\
+		{\color{Data61 plum}\vdash_{seq}} [P] xs [R1] \quad
+		&\texttt{(p,zs,t')}\in \texttt{bl}
+		&c=0 \Rightarrow\texttt{bl}{\color{Data61 ocean blue}\vdash_{blocks}} [\textcolor<2>{Data61 vermillion}{\t{pc } p} \wedge^* R2] (p,zs,t') [Q]
+		\end{aligned}
+		}
+	{\begin{aligned}\texttt{bl~}{\color{Data61 ocean blue}\vdash_{blocks}} [P] (n,xs,Jumpi) [Q]\end{aligned}}$
+	\
+	\uncover<2>{
+	\begin{align*}
+	R1 = ~& {\color{Data61 plum}\langle h \leq 1022 \wedge \color{Data61 plum}10 \leq g \rangle}~ \wedge^*
+	{\color{Data61 dark mint}\texttt{continuing }} \wedge^*\\
+	&{\color{Data61 vermillion}\texttt{program-counter (p - 1) }}\wedge^*
+	{\color{Data61 ocean blue}\texttt{gas-pred g }} \wedge^*\\
+	&{\color{Data61 fuchsia}\texttt{stack-height (h + 2) }} \wedge^*
+	{\color{Data61 fuchsia}\texttt{stack (h+1) m }} \wedge^*
+	{\color{Data61 fuchsia}\texttt{stack h c }} \wedge^*
+	{\color{Data61 light forest}\texttt{rest}}\\
+	\end{align*}
+	\begin{align*}
+	R2 = ~&{\color{Data61 dark mint}\texttt{continuing }} \wedge^*
+	{\color{Data61 ocean blue}\texttt{gas-pred (g - 10) }} \wedge^*\\
+	&{\color{Data61 fuchsia}\texttt{stack-height h }} \wedge^*
+	{\color{Data61 light forest}\texttt{rest}}\\
+	\end{align*}
+	}
+\end{frame}
+
+%%16
+\begin{frame}{Correction}
+	\[{\color{Data61 green}\vdash_{inst}}~[P]~i~[Q]~ \Rightarrow {\color{Data61 dark mint}\vDash} [P]~\{i\}~[Q]\]
+	\uncover<2->{\[{\color{Data61 plum}\vdash_{seq}}~[P]~xs~[Q]~ \Rightarrow {\color{Data61 dark mint}\vDash} [P]~(\t{set } xs)~[Q]\]}
+	\uncover<3->{
+	\begin{gather*}
+		\uncover<4>{0<  \vert c\vert < 2^{256} \Rightarrow\\}
+		{\t{build\_blocks }c~{\color{Data61 ocean blue}\vdash_\t{blocks}} [P]~(fst\_block)~[Q]}\Rightarrow\\
+		{\color{Data61 dark mint}\vDash} [P]~(\t{set } c)~[Q]
+	\end{gather*}}
+%	${\color{Data61 dark mint}\vDash}$ = terminating semantic for bytecode
+\end{frame}
+
+\begin{frame}{V\'{e}rification d'un contrat simple}
+		\footnotesize
+	\begin{columns}[c]
+		\column{.46\textwidth}
+		Contrat en \textit{Solidity} :\\
+		\ttfamily
+		\textcolor{Data61 ocean blue}{contract} D \{ \\
+		\quad	\textcolor{Data61 ocean blue}{function} dispatch1()\\
+		\quad	\textcolor{Data61 ocean blue}{returns} (\textcolor{Data61 midnight blue}{uint}) \{\\
+		\quad\quad	return (1);\\
+		\quad	\}\\
+		\quad	\textcolor{Data61 ocean blue}{function} dispatch2()\\
+		\quad	\textcolor{Data61 ocean blue}{returns} (\textcolor{Data61 midnight blue}{uint}) \{\\
+		\quad\quad	{return} (2);\\
+		\quad	\}\\
+		\}\\
+		
+		\column{.6\textwidth}
+		\uncover<3->{Sp\'{e}cification en Isabelle :\\
+		\ttfamily
+		\textcolor{Data61 dark mint}{definition}\\
+		\quad return$\_$action\\
+		\textcolor{Data61 dark mint}{where}\\
+		"return$\_$action hash = \\
+		(\alert<3>{\textcolor{Data61 dark mint}{if} hash = dispatch1$\_$hash}\\
+		\alert<3>{\textcolor{Data61 dark mint}{then} ContractReturn 1}\\
+		\textcolor{Data61 dark mint}{else}\\
+		(\alert<4>{\textcolor{Data61 dark mint}{if} hash = dispatch2$\_$hash}\\
+		\alert<4>{\textcolor{Data61 dark mint}{then} ContractReturn 2}\\
+		\alert<5>{\textcolor{Data61 dark mint}{else} ContractFail [ShouldNotHappen]}))"}
+	\end{columns}
+~\\~\\
+\uncover<2->{Invoquer un contrat = appel d'une fonction en particulier}\\
+\uncover<3->{Dispatcher v\'{e}rifiable uniquement \`{a} partir du bytecode}
+\end{frame}
+
+\begin{frame}{Preuve automatique}
+	\footnotesize
+	{\ttfamily
+	\textcolor{Data61 dark mint}{lemma}:\\
+	"$\exists$ r.\\
+	build$\_$blocks D ${\color{Data61 ocean blue}\vdash_\t{blocks}}$ \\
+	$[$program$\_$counter 0 $\wedge^*$ stack$\_$height 0 $\wedge^*$ sent$\_$data hash $\wedge^*$ sent$\_$value 0 $\wedge^*$
+	memory$\_$usage 0 $\wedge^*$ continuing $\wedge^*$ gas$\_$pred 3000 $\wedge^*$ memory 64 x $\wedge^*$
+	memory 96 y]\\
+	fst$\_$block D\\
+	$[$action (return$\_$action hash) $\wedge^*$ r]"}
+	
+	~\\
+	\normalsize
+	\uncover<2>{
+	Contrat de 226 octets \\
+	14 lignes d'Isabelle gr\^{a}ce \`{a} l'automatisation}
+\end{frame}
+
+
+%%19
+\part{Travail \`{a} venir}
+\frame{\partpage}
+
+%%17
+\begin{frame}{R\'{e}sum\'{e} - contributions}
+	\begin{itemize}
+		\item D\'{e}finir la d\'{e}coupe du bytecode en bloc en Isabelle
+		\item Prouver la d\'{e}coupe correcte
+		\item D\'{e}finir une logique de programme pour la correction totale
+		\item Prouver la correction de la logique
+		\item Automatiser les preuves
+	\end{itemize}
+	
+\end{frame}
+
+
+%%20
+\begin{frame}{Sp\'{e}cification d'autres contrats}
+	\begin{itemize}
+		\item \'{E}crire les r\`{e}gles pour toutes les instructions (31/70)
+		\item Les prouver correctes
+		\item Sp\'{e}cification de contrat plus complexes
+	\end{itemize}
+\end{frame}
+
+%%21
+%\begin{frame}{Control flow graph}
+%	CFG was the initial goal\\
+%	BUT problems with dynamic jumps\\
+%	HOWEVER proposition of static jumps and explicit function calls for EVM 1.5
+%	\\~\\
+%	\begin{itemize}
+%		\item Add edges to our blocks
+%		\item Detect loops
+%		\item More structured program
+%	\end{itemize}
+%\end{frame}
+
+%\begin{frame}{My internship}
+%	\setbeamercovered{transparent}
+%		\begin{itemize}
+%		\item Learning more about blockchain
+%		\item<2-> Discovering Isabelle
+%		\item<3-> Love formal verification again
+%		\item<4-> Research is not working all alone
+%		\item<5-> \alert<5>{This group is great}
+%	\end{itemize}
+%\end{frame}
+
+%%22
+\frame[plain]{\thankspage{}{}{}{myriam.begel@ens-paris-saclay.fr}{}}
+
+% \part \partpage not implemented yet
+% thanks/question page not implemented
+
+\bibliography{../bibli}
+
+\end{document}
