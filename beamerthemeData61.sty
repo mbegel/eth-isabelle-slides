@@ -5,7 +5,7 @@
 
 \ProvidesPackage{beamerthemeData61}
 
-\usepackage[australian]{babel}
+%\usepackage[australian]{babel}
 \usepackage{pgf}
 \usepackage{calc}
 
@@ -29,8 +29,9 @@
       \LARGE\bfseries\inserttitle
     \end{beamercolorbox}
   }
-  \pgftext[at=\pgfpoint{20pt}{60pt},left]{\bfseries\color{white}\insertauthor}
-  \pgftext[at=\pgfpoint{20pt}{45pt},left]{\color{white}\insertdate}
+  \pgftext[at=\pgfpoint{20pt}{60pt},left]{\color{white}\insertauthor}
+  \pgftext[at=\pgfpoint{20pt}{45pt},left]{\scriptsize\color{white}\insertinstitute}
+  \pgftext[at=\pgfpoint{20pt}{30pt},left]{\color{white}\insertdate}
   \pgftext[at=\pgfpoint{20pt}{10pt},left,bottom]{\small\color{Data61 green}www.data61.csiro.au}
 \end{pgfpicture}
 }
