@@ -31,10 +31,12 @@
 
 % new language
 \lstdefinelanguage{Isar}%
-  {morekeywords={
+  {keywords={
         _first,theory,end,types,datatype,consts,defs,primrec,
         syntax,translations,apply,definition,fun,function, lemma,theorem,corollary,
-        done,sorry,goal,proof,fixed variables,_last, inductive, where},
+        done,sorry,goal,proof,fixed variables,_last, inductive, where, if, then, else, where},
+    keywordstyle=\color{Data61 light forest}\bfseries,
+    keywordstyle=[3]\itshape,
         sensitive=true,
         morecomment=[l]{-- },
         literate=

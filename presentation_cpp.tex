@@ -97,9 +97,9 @@ node distance=1.3cm,
 
 \lstdefinelanguage{Solidity}{
 	keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break, returns, contract, public,payable},
-	keywordstyle=\color{blue}\bfseries,
+	keywordstyle=\color{Data61 ocean blue}\bfseries,
 	keywordstyle=[2]\color{black}\bfseries,
-	keywordstyle=[3]\color{purple}\bfseries,
+	keywordstyle=[3]\color{Data61 plum}\bfseries,
 	keywordstyle=[4]\color{black}\bfseries,
 	keywords=[2]{address, uint256},
 	keywords=[3]{require,selfdestruct},
@@ -138,11 +138,9 @@ node distance=1.3cm,
 	%\begin{columns}[c]
 	%	\column{.6\textwidth}
 		\begin{itemize}
-			\item Decentralised platform (\emph{blockchain}) to run smart contracts
-			\item Smart contracts can receive/transfer cryptocurrency
-			Turing-complete programs
-			\item Smart contracts runned by the \emph{Ethereum Virtal Machine}
-			\item Ethereum cryptocurrency: \emph{ether}
+			\item Decentralised platform (\emph{blockchain}) to run smart contracts, Turing-complete programs
+			\item Smart contracts can receive/transfer cryptocurrency (\emph{ether})
+			\item Smart contracts run by the \emph{Ethereum Virtal Machine}
 			\item Critical use for: voting, pharmaceutical supply chains, electrical power grids
 			\item No central authority
 		\end{itemize}
@@ -152,7 +150,7 @@ node distance=1.3cm,
 \end{frame}
 
 %%4
-\begin{frame}{Ethereum Virtual Machine \footnotesize{\cite{wood2014ethereum}}}
+\begin{frame}{Ethereum Virtual Machine}
 	\begin{columns}[c]
 		\column{.6\textwidth}
 		\begin{itemize}
@@ -172,23 +170,19 @@ node distance=1.3cm,
 %%5
 \begin{frame}{EVM bytecode verification}
 	\begin{itemize}
-	    \item Previous work (in Isabelle/HOL):
-	    \begin{itemize}
-	    	\item Yoichi Hirai built a Hoare Logic for EVM bytecode
-	    \end{itemize}
+	    \item Yoichi Hirai formalised and validated EVM in Isabelle/HOL
 	 
-	    \item Reasoning about a flat list of bytes is tedious
+	    \item Reasoning about a flat, unstructured list of instructions is tedious
 		\begin{itemize}
 			\item Cannot match syntactically on program structure
 		\end{itemize}
 	
-	    \item Our work:
+	    \item Our contributions:
 	    \begin{itemize}
-	    	\item Give more structure to bytecode
-	    	\item Decompose it into basic blocks
-	    	\item New program logic
-	    	\item Facilitate proof automation
-	    	\item Proved soundness w.r.t. bytecode semantics
+	    	\item Total correctness properties of contracts based on gas consumption
+	    	\item Sound program logic to derive such properties
+	    	\item Reasoning at the level of bytecode split into basic blocks
+	    	\item Automation of verification condition generator
 	    \end{itemize}
 	\end{itemize}
 \end{frame}
@@ -209,22 +203,23 @@ node distance=1.3cm,
 	~\\
 	\uncover<2>{
 	Does not ensure reaching a terminating state without the $\ncont$ flag. \\
-	$\pvalid{P}{c}{\ncont \sconj Q}$ means $c$ \emph{terminates} in a $Q'$-state}
+	$\pvalid{P}{c}{\ncont \sconj Q'}$ means $c$ \emph{terminates} in a $Q'$-state}
 \end{frame}
 
 \begin{frame}{Total correctness statements}
 	\begin{itemize}
-		\item States with $\ncont$ are fixed-points of $\xnext$
-		\item Every execution ends up in a terminating state : smart-contracts may run out of gas
-		\item $\xnext_\mu (s) = \xnext^k(s)$ where $\xnext^k(s)$ is the first iteration containing $\ncont$
+		\item<1-> States with $\ncont$ are fixed-points of $\xnext$
+		\item<2-> Every execution ends up in a terminating state: \\a smart-contract ends normally or runs out of gas
+		\item<3-> $\xnext_\mu (s) = \xnext^k(s)$ where $\xnext^k(s)$ is the first iteration containing $\ncont$
 	\end{itemize}
+	\uncover<4->{
 	\begin{center}
 		$\tvalid{P}{c}{Q}$ iff \\
 		$\forall s. F. (P \sconj \code{c} \sconj F)\:s \Rightarrow$ \\
 		$(Q \sconj \code{c} \sconj F)\:\xnext_\mu(s)$
-	\end{center}
+	\end{center}}
 	\begin{itemize}
-		\item $Q$ enforced to be terminating
+		\item<5-> $Q$ enforced to be terminating
 	\end{itemize}
 \end{frame}
 
@@ -232,52 +227,83 @@ node distance=1.3cm,
 \begin{frame}{Program logic}	
 	3 levels for the program logic\\~
 	\begin{itemize}
-		\item<2-> Instructions $\vinstr$
+		\item<2-> For the instructions $\vinstr$
 			\begin{itemize}
 				\item one rule per instruction
 %				\item<5-> non-terminating semantic with 1 step
 			\end{itemize}
-		\item<3-> Basic block $\vblock$
+		\item<3-> For the \emph{basic blocks} $\vblock$
 			\begin{itemize}
 				\item unroll list of sequential instructions
 %				\item<5-> non-terminating semantic with $n$ steps \\ $n=$ number of instructions
 			\end{itemize}
-		\item<4-> Connect blocks $\vprog$
+		\item<4-> For the program $\vprog$
 			\begin{itemize}
-				\item jumps from one block to another
+				\item jump from one block to another
 %				\item<6-> terminating semantic
 			\end{itemize}
 	\end{itemize}
 	\uncover<5>{
 		\begin{figure}
+			\vspace{-10pt}
 			\[
 			\dfrac
 			{\dfrac
 				{\dfrac{}{\tinstr{P}{hd~b}{R_1}}
 					\quad
 					\dfrac
-					{\dfrac{}{\vinstr \sim} \quad
-						\dfrac{\dots}{\vblock \sim}}
+					{\vdots}
+					%{\dfrac{}{\vinstr \sim} \quad
+					%	\dfrac{\dots}{\vblock \sim}}
 					{\tblock{R_1}{tl~b}{R}}}
 				{\tblock{P}{b}{R}}
-				\quad \dfrac{\dots}{\tprog{blocks}{R}{next~block}{Q}}}
-			{\tprog{blocks}{P}{b}{Q}}\]
+				\quad \dfrac{\vdots}{\tprog{prog}{R}{b'}{Q}}}
+			{\tprog{prog}{P}{b}{Q}}\]
 		\end{figure}}
+\end{frame}
+
+\begin{frame}{Sequential block}
+	Maximum block of straight-line code - Jumps are removed
+	\\~\\
+	\centering
+	\begin{tabular}{c | r l | c}
+		block index & address & instruction & block type\\
+		\hline
+		{0}&       0       &       $\instr{OR}$&\textit{Next}\\
+		&       1       &       $\instr{ADD}$&\\
+		&    2       &       $\instr{SWAP1}$&  \\
+		\hline
+		{3}&       3       &       $\instr{JUMPDEST}$&\textit{Jump}\\
+		&       4       &       $\instr{MLOAD}$&\\
+		&       5       &       $\instr{POP}$&\\
+		&    \textcolor{gray}{6}     &       {\color{gray}$\instr{JUMP}$}& \\
+		\hline
+		{7}&       7       &       $\instr{DUP3}$&\textit{Jumpi}\\
+		&       8       &       $\instr{PUSH1}\;0$&\\
+		&       10      &       $\instr{ISZERO}$&\\
+		&    \textcolor{gray}{11}    &       {\color{gray}$\instr{JUMPI}$}& \\
+		\hline
+		{12}&       12      &       $\instr{POP}$&\textit{Terminal}\\
+		&   13      &       $\instr{RETURN}$& \\
+		\hline
+	\end{tabular}
 \end{frame}
 
 \begin{frame}{Rules for $\mathit{Terminal}$ and $\mathit{Next}$ blocks}
 	\[
 	\RuleC{\tblock{P}{\mathit{xs}}{Q}}
-	{\tprog{blocks}{P}{(n, \mathit{xs}, \mathit{Terminal})}{Q}}
+	{\tprog{prog}{P}{(n, \mathit{xs}, \mathit{Terminal})}{Q}}
 	\]
 	~\\
-	\uncover<2>{
+	\uncover<2->{
 	\[
-	\RuleC{\begin{array}{l} \tblock{P}{\mathit{xs}}{\pc\;m \sconj R} \\
-		(m, \mathit{ys},t) \in \mathit{blocks} \\
-		\tprog{blocks}{\pc\;m \sconj R}{(m, \mathit{ys},t)}{Q}
+		\RuleC{\begin{array}{l} \tblock{P}{\mathit{xs}}{\pc\;\textcolor<3->{Data61 vermillion}{m} \sconj R} 
+		\\
+		(\textcolor<3->{Data61 vermillion}{m}, \mathit{ys},t) \in \mathit{blocks} 
+		\\
+		\tprog{prog}{\pc\;\textcolor<3->{Data61 vermillion}{m} \sconj R}{(\textcolor<3->{Data61 vermillion}{m}, \mathit{ys},t)}{Q}
 		\end{array}}
-	{\tprog{blocks}{P}{(n, \mathit{xs}, \mathit{Next})}{Q}}
+	{\tprog{prog}{P}{(n, \mathit{xs}, \mathit{Next})}{Q}}
 	\]}
 \end{frame}
 
@@ -296,45 +322,18 @@ node distance=1.3cm,
 		R1 = ~& {\color{Data61 plum}\langle h \leq 1023 \wedge \color{Data61 plum}8 \leq g \rangle}~ \wedge^* 
 		{\color{Data61 dark mint}\texttt{continuing }} \wedge^*
 		{\color{Data61 ocean blue}\texttt{gas-pred g }} \wedge^*\\
-		&{\color{Data61 vermillion}\texttt{program-counter (n + inst-size-list xs) }}\wedge^*\\
+		&{\color{Data61 vermillion}\texttt{program-counter (n + size xs) }}\wedge^*\\
 		&{\color{Data61 fuchsia}\texttt{stack-height (Suc h) }} \wedge^*
-		{\color{Data61 fuchsia}\texttt{stack h m }} \wedge^*
+		{\color{Data61 fuchsia}\texttt{stack h j }} \wedge^*
 		{\color{Data61 light forest}\texttt{rest}}\\
 		R2 = ~&{\color{Data61 dark mint}\texttt{continuing }} \wedge^*
 		{\color{Data61 ocean blue}\texttt{gas-pred (g - 8) }} \wedge^*\\
-		&{\color{Data61 vermillion}\texttt{program-counter m }}\wedge^*
+		&{\color{Data61 vermillion}\texttt{program-counter j }}\wedge^*
 		{\color{Data61 fuchsia}\texttt{stack-height h }} \wedge^*
 		{\color{Data61 light forest}\texttt{rest}}
 		\end{align*}
 	}
 	\uncover<3>{Similar for JUMPI}
-\end{frame}
-
-\begin{frame}{Sequential block}
-	Maximum block of straight-line code - jumps are removed
-	\\~\\
-	\centering
-\begin{tabular}{c | r l | c}
-	block index & address & instruction & block type\\
-	\hline
-	{0}&       0       &       $\instr{OR}$&\textit{Next}\\
-	&       1       &       $\instr{ADD}$&\\
-	&    2       &       $\instr{SWAP1}$&  \\
-	\hline
-	{3}&       3       &       $\instr{JUMPDEST}$&\textit{Jump}\\
-	&       4       &       $\instr{MLOAD}$&\\
-	&       5       &       $\instr{POP}$&\\
-	&    \textcolor{gray}{6}     &       {\color{gray}$\instr{JUMP}$}& \\
-	\hline
-	{7}&       7       &       $\instr{DUP3}$&\textit{Jumpi}\\
-	&       8       &       $\instr{PUSH1}\;0$&\\
-	&       10      &       $\instr{ISZERO}$&\\
-	&    \textcolor{gray}{11}    &       {\color{gray}$\instr{JUMPI}$}& \\
-	\hline
-	{12}&       12      &       $\instr{POP}$&\textit{Terminal}\\
-	&   13      &       $\instr{RETURN}$& \\
-	\hline
-\end{tabular}
 \end{frame}
 
 \begin{frame}{Rules for a basic block}
@@ -356,24 +355,24 @@ node distance=1.3cm,
 	Rule for ADD
 	\begin{align*}
 	\vinstr&\\
-	[&{\color<2>{Data61 plum}\langle h \leq 1023 \wedge 2 \leq g \rangle}~ \wedge^*\\
+	[&{\color<2>{Data61 plum}\langle h \leq 1023 \wedge 3 \leq g \rangle}~ \wedge^*\\
 	&{\color<3>{Data61 dark mint}\texttt{continuing }} \wedge^*
 	{\color<4>{Data61 vermillion}\texttt{program-counter n }} \wedge^*\\
 	&{\color<5>{Data61 ocean blue}\texttt{gas-pred g }} \wedge^*
 	{\color<6>{Data61 fuchsia}\texttt{stack-height (Suc (Suc h)) }} \wedge^*\\
 	&{\color<6>{Data61 fuchsia}\texttt{stack (Suc h) a }} \wedge^*
 	{\color<6>{Data61 fuchsia}\texttt{stack h b }} \wedge^*
-	{\color<7>{Data61 light forest}\texttt{F}}
+	{\color<7>{Data61 light forest}\texttt{F}}]
 	\\
 	(&\texttt{\textcolor<4>{Data61 vermillion}{n}, \textcolor<1>{Data61 light teal}{ADD}}) \\
 	[&{\color<3>{Data61 dark mint}\texttt{continuing }} \wedge^*
 	{\color<4>{Data61 vermillion}\texttt{program-counter (n + 1) }} \wedge^*\\
-	&{\color<5>{Data61 ocean blue}\texttt{gas-pred (g - 2) }} \wedge^*
+	&{\color<5>{Data61 ocean blue}\texttt{gas-pred (g - 3) }} \wedge^*
 	{\color<6>{Data61 fuchsia}\texttt{stack-height (Suc h) }} \wedge^*\\
 	&{\color<6>{Data61 fuchsia}\texttt{stack h (a+b) }} \wedge^*
 	{\color<7>{Data61 light forest}\texttt{F}}]
 	\end{align*}
-	\uncover<8>{Currently, 36/75 instructions specified}
+	\uncover<8>{Currently, 96/124 instructions specified}
 \end{frame}
 
 \begin{frame}{Soundness}
@@ -512,19 +511,11 @@ where
 
 \begin{frame}{Automation}
 	\centering
-  Syntax-driven verification
-  condition generator
-\end{frame}
-
-%%17
-\begin{frame}{Summary - contributions}
-	\begin{itemize}
-		\item Defined function splitting bytecode into basic blocks in Isabelle
-		\item Defined program logic for total correctness
-		\item Proved soundness of program logic
-		\item Developed a VCG to automate proofs
-	\end{itemize}
-
+	Syntaxic match to know which rule to apply
+	\\~\\
+	$\approx 40$ lines of proof for this example \\
+	$\approx 500$ lines of reusable
+	proof automation machinery
 \end{frame}
 
 %%19
@@ -534,15 +525,21 @@ where
 %%20
 \begin{frame}{Future work}
 	\begin{itemize}
-		\item Write rules for all the instructions (36/70)
-		\item Prove them sound
-		\item Give more structure back - EVM 1.5 with static jumps
+		\item Write \emph{sound} rules for all the instructions (36/70)
+		\item Give more structure back (loops with heuristics)
+		\item Restore functions calls
+		\\~\\
+		\begin{itemize}
+			\item Proposal for EVM 1.5: static jumps and explicit function calls
+		\end{itemize}
 	\end{itemize}
 \end{frame}
 
 
 %%22
-\frame[plain]{\thankspage{}{}{}{}{}}
+\frame[plain]{\thankspage{}{\scriptsize myriam.begel@ens-paris-saclay.fr}{}
+	{Sidney Amani, Maksym Bortin, Mark Staples - \scriptsize Data61 (CSIRO)}
+	{\scriptsize\textit{Firstname.Lastname}@data61.csiro.au}}
 
 % \part \partpage not implemented yet
 % thanks/question page not implemented
