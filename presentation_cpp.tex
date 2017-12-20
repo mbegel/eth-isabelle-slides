@@ -192,7 +192,7 @@ node distance=1.3cm,
 \frame{\partpage}
 
 \begin{frame}{Partial correctness statements}
-	$\xnext$ = single machine step
+	$\xnext$ = single machine step performing instruction at the current pc
 	\\~\\
 	\begin{center}
 			$\pvalid{P}{c}{Q}$ iff \\
@@ -202,14 +202,14 @@ node distance=1.3cm,
 
 	~\\
 	\uncover<2>{
-	Does not ensure reaching a terminating state without the $\ncont$ flag. \\
+	Does not ensure that Q holds in a final state without the $\ncont$ flag. \\
 	$\pvalid{P}{c}{\ncont \sconj Q'}$ means $c$ \emph{terminates} in a $Q'$-state}
 \end{frame}
 
 \begin{frame}{Total correctness statements}
 	\begin{itemize}
 		\item<1-> States with $\ncont$ are fixed-points of $\xnext$
-		\item<2-> Every execution ends up in a terminating state: \\a smart-contract ends normally or runs out of gas
+		\item<2-> Every execution ends up in a terminating state: \\a smart-contract ends normally or runs out of \emph{gas}
 		\item<3-> $\xnext_\mu (s) = \xnext^k(s)$ where $\xnext^k(s)$ is the first iteration containing $\ncont$
 	\end{itemize}
 	\uncover<4->{
@@ -219,8 +219,35 @@ node distance=1.3cm,
 		$(Q \sconj \code{c} \sconj F)\:\xnext_\mu(s)$
 	\end{center}}
 	\begin{itemize}
-		\item<5-> $Q$ enforced to be terminating
+		\item<5-> $Q$ now enforced to hold in the final states of executions starting in $P$-states
 	\end{itemize}
+\end{frame}
+
+\begin{frame}{Basic block}
+	Maximum block of straight-line code - Jumps are removed
+	\\~\\
+	\centering
+	\begin{tabular}{c | r l | c}
+		block index & address & instruction & block type\\
+		\hline
+		{0}&       0       &       $\instr{OR}$&\textit{Next}\\
+		&       1       &       $\instr{ADD}$&\\
+		&    2       &       $\instr{SWAP1}$&  \\
+		\hline
+		{3}&       3       &       $\instr{JUMPDEST}$&\textit{Jump}\\
+		&       4       &       $\instr{MLOAD}$&\\
+		&       5       &       $\instr{POP}$&\\
+		&    \textcolor{gray}{6}     &       {\color{gray}$\instr{JUMP}$}& \\
+		\hline
+		{7}&       7       &       $\instr{DUP3}$&\textit{Jumpi}\\
+		&       8       &       $\instr{PUSH1}\;0$&\\
+		&       10      &       $\instr{ISZERO}$&\\
+		&    \textcolor{gray}{11}    &       {\color{gray}$\instr{JUMPI}$}& \\
+		\hline
+		{12}&       12      &       $\instr{POP}$&\textit{Terminal}\\
+		&   13      &       $\instr{RETURN}$& \\
+		\hline
+	\end{tabular}
 \end{frame}
 
 %%9
@@ -257,42 +284,15 @@ node distance=1.3cm,
 					%	\dfrac{\dots}{\vblock \sim}}
 					{\tblock{R_1}{tl~b}{R}}}
 				{\tblock{P}{b}{R}}
-				\quad \dfrac{\vdots}{\tprog{prog}{R}{b'}{Q}}}
-			{\tprog{prog}{P}{b}{Q}}\]
+				\quad \dfrac{\vdots}{\tprog{blocks}{R}{b'}{Q}}}
+			{\tprog{blocks}{P}{b}{Q}}\]
 		\end{figure}}
-\end{frame}
-
-\begin{frame}{Sequential block}
-	Maximum block of straight-line code - Jumps are removed
-	\\~\\
-	\centering
-	\begin{tabular}{c | r l | c}
-		block index & address & instruction & block type\\
-		\hline
-		{0}&       0       &       $\instr{OR}$&\textit{Next}\\
-		&       1       &       $\instr{ADD}$&\\
-		&    2       &       $\instr{SWAP1}$&  \\
-		\hline
-		{3}&       3       &       $\instr{JUMPDEST}$&\textit{Jump}\\
-		&       4       &       $\instr{MLOAD}$&\\
-		&       5       &       $\instr{POP}$&\\
-		&    \textcolor{gray}{6}     &       {\color{gray}$\instr{JUMP}$}& \\
-		\hline
-		{7}&       7       &       $\instr{DUP3}$&\textit{Jumpi}\\
-		&       8       &       $\instr{PUSH1}\;0$&\\
-		&       10      &       $\instr{ISZERO}$&\\
-		&    \textcolor{gray}{11}    &       {\color{gray}$\instr{JUMPI}$}& \\
-		\hline
-		{12}&       12      &       $\instr{POP}$&\textit{Terminal}\\
-		&   13      &       $\instr{RETURN}$& \\
-		\hline
-	\end{tabular}
 \end{frame}
 
 \begin{frame}{Rules for $\mathit{Terminal}$ and $\mathit{Next}$ blocks}
 	\[
 	\RuleC{\tblock{P}{\mathit{xs}}{Q}}
-	{\tprog{prog}{P}{(n, \mathit{xs}, \mathit{Terminal})}{Q}}
+	{\tprog{blocks}{P}{(n, \mathit{xs}, \mathit{Terminal})}{Q}}
 	\]
 	~\\
 	\uncover<2->{
@@ -301,21 +301,21 @@ node distance=1.3cm,
 		\\
 		(\textcolor<3->{Data61 vermillion}{m}, \mathit{ys},t) \in \mathit{blocks} 
 		\\
-		\tprog{prog}{\pc\;\textcolor<3->{Data61 vermillion}{m} \sconj R}{(\textcolor<3->{Data61 vermillion}{m}, \mathit{ys},t)}{Q}
+		\tprog{blocks}{\pc\;\textcolor<3->{Data61 vermillion}{m} \sconj R}{(\textcolor<3->{Data61 vermillion}{m}, \mathit{ys},t)}{Q}
 		\end{array}}
-	{\tprog{prog}{P}{(n, \mathit{xs}, \mathit{Next})}{Q}}
+	{\tprog{blocks}{P}{(n, \mathit{xs}, \mathit{Next})}{Q}}
 	\]}
 \end{frame}
 
 %%14
-\begin{frame}{Rule for a Jump block}
+\begin{frame}{Rule for a $\mathit{Jump}$ block}
 	\[
 	\RuleC{\begin{array}{l}\tblock{P}{\mathit{xs}}{R_1} \\
 			(j, \mathit{ys},t) \in \mathit{blocks} \\
 			\hd\mathit{ys} = (j, \instr{JUMPDEST}) \\
-			\tprog{\mathit{blocks}}{R_2}{(j, \mathit{ys},t)}{Q}
+			\tprog{blocks}{R_2}{(j, \mathit{ys},t)}{Q}
 		\end{array}}
-		{\tprog{\mathit{blocks}}{P}{(n, \mathit{xs}, \mathit{Jump})}{Q}}
+		{\tprog{blocks}{P}{(n, \mathit{xs}, \mathit{Jump})}{Q}}
 	\]
 	\uncover<2->{
 		\begin{align*}
@@ -333,7 +333,7 @@ node distance=1.3cm,
 		{\color{Data61 light forest}\texttt{rest}}
 		\end{align*}
 	}
-	\uncover<3>{Similar for JUMPI}
+	\uncover<3>{Conditional jumps (JUMPI) are treated similarly}
 \end{frame}
 
 \begin{frame}{Rules for a basic block}
