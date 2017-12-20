@@ -9,6 +9,7 @@
 \usepackage{tikz}
 \usepackage[normalem]{ulem}
 \usetheme{Data61}
+\usepackage{colortbl}
 \renewcommand{\t}[1]{\texttt{#1}}
 
 \input{0header}
@@ -227,26 +228,26 @@ node distance=1.3cm,
 	Maximum block of straight-line code - Jumps are removed
 	\\~\\
 	\centering
-	\begin{tabular}{c | r l | c}
-		block index & address & instruction & block type\\
-		\hline
-		{0}&       0       &       $\instr{OR}$&\textit{Next}\\
+	\begin{tabular}{c !{\color{black}\vrule} r l !{\color{black}\vrule} c}
+		\uncover<3->{block index} & address & instruction & \uncover<3->{block type}\\
+		\arrayrulecolor<-2>{white}\hline
+		\uncover<3->{0}&       0       &       $\instr{OR}$&\uncover<3->{\textit{Next}}\\
 		&       1       &       $\instr{ADD}$&\\
 		&    2       &       $\instr{SWAP1}$&  \\
-		\hline
-		{3}&       3       &       $\instr{JUMPDEST}$&\textit{Jump}\\
+		\arrayrulecolor<-2>{white}\hline
+		\uncover<5->{3}&       3       &       \textcolor<2>{Data61 vermillion}{$\instr{JUMPDEST}$} & \uncover<5->{\textit{Jump}}\\
 		&       4       &       $\instr{MLOAD}$&\\
 		&       5       &       $\instr{POP}$&\\
-		&    \textcolor{gray}{6}     &       {\color{gray}$\instr{JUMP}$}& \\
-		\hline
-		{7}&       7       &       $\instr{DUP3}$&\textit{Jumpi}\\
+		&    {\color<5->{gray}6}     &       {\color<5->{gray}\color<4>{Data61 vermillion}$\instr{JUMP}$}& \\
+		\arrayrulecolor<-4>{white}\hline
+		\uncover<5->{7}&       7       &       $\instr{DUP3}$&\uncover<5->{\textit{Jumpi}}\\
 		&       8       &       $\instr{PUSH1}\;0$&\\
 		&       10      &       $\instr{ISZERO}$&\\
-		&    \textcolor{gray}{11}    &       {\color{gray}$\instr{JUMPI}$}& \\
-		\hline
-		{12}&       12      &       $\instr{POP}$&\textit{Terminal}\\
-		&   13      &       $\instr{RETURN}$& \\
-		\hline
+		&    \textcolor<5->{gray}{11}    &       {\color<5->{gray}\color<4>{Data61 vermillion}$\instr{JUMPI}$}& \\
+		\arrayrulecolor<-4>{white}\hline
+		\uncover<7->{12}&       12      &       $\instr{POP}$&\uncover<7->{\textit{Terminal}}\\
+		&   13      &       \textcolor<6>{Data61 vermillion}{$\instr{RETURN}$}& \\
+		\arrayrulecolor<-6>{white}\hline
 	\end{tabular}
 \end{frame}
 
