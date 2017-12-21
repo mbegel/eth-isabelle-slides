@@ -130,11 +130,12 @@ node distance=1.3cm,
 \part{Context}
 \frame{\partpage}
 
+%%3 
 \begin{frame}{Cost of smart contract bugs}
 	\includegraphics[scale=0.5]{Figures/intro.png}
 \end{frame}
 
-%%3
+%%4
 \begin{frame}{Ethereum}
 	%\begin{columns}[c]
 	%	\column{.6\textwidth}
@@ -150,7 +151,7 @@ node distance=1.3cm,
 	%\end{columns}
 \end{frame}
 
-%%4
+%%5
 \begin{frame}{Ethereum Virtual Machine}
 	\begin{columns}[c]
 		\column{.6\textwidth}
@@ -168,7 +169,7 @@ node distance=1.3cm,
 	\end{columns}
 \end{frame}
 
-%%5
+%%6
 \begin{frame}{EVM bytecode verification}
 	\begin{itemize}
 	    \item Yoichi Hirai formalised and validated EVM in Isabelle/HOL
@@ -188,10 +189,11 @@ node distance=1.3cm,
 	\end{itemize}
 \end{frame}
 
-%%8
+%%7
 \part{Contributions}
 \frame{\partpage}
 
+%%8
 \begin{frame}{Partial correctness statements}
 	$\xnext$ = single machine step performing instruction at the current pc
 	\\~\\
@@ -207,23 +209,37 @@ node distance=1.3cm,
 	$\pvalid{P}{c}{\ncont \sconj Q'}$ means $c$ \emph{terminates} in a $Q'$-state}
 \end{frame}
 
-\begin{frame}{Total correctness statements}
+%%9
+\begin{frame}{Termination of smart contracts}
 	\begin{itemize}
 		\item<1-> States with $\ncont$ are fixed-points of $\xnext$
-		\item<2-> Every execution ends up in a terminating state: \\a smart-contract ends normally or runs out of \emph{gas}
-		\item<3-> $\xnext_\mu (s) = \xnext^k(s)$ where $\xnext^k(s)$ is the first iteration containing $\ncont$
+		\item<2-> Every execution ends up in a terminating state:
+		\begin{itemize}
+			\item To invoke a contract, a gas budget is provided
+			\item EVM deducts a specified amount of gas for execution of each instruction
+			\item Hence any contract eventually reaches $\ncont$: 
+			either normally or with the 'out-of-gas' exception
+		\end{itemize}
 	\end{itemize}
-	\uncover<4->{
+\end{frame}
+
+%%10
+\begin{frame}{Total correctness statements}
+	\begin{itemize}
+		\item $\xnext_\mu (s) = \xnext^k(s)$ where $\xnext^k(s)$ is the first iteration containing $\ncont$
+	\end{itemize}
+	\uncover<2->{
 	\begin{center}
 		$\tvalid{P}{c}{Q}$ iff \\
 		$\forall s. F. (P \sconj \code{c} \sconj F)\:s \Rightarrow$ \\
 		$(Q \sconj \code{c} \sconj F)\:\xnext_\mu(s)$
 	\end{center}}
 	\begin{itemize}
-		\item<5-> $Q$ now enforced to hold in the final states of executions starting in $P$-states
+		\item<3> $Q$ now enforced to hold in the final states of executions starting in $P$-states
 	\end{itemize}
 \end{frame}
 
+%%11
 \begin{frame}{Basic block}
 	Maximum block of straight-line code - Jumps are removed
 	\\~\\
@@ -251,7 +267,7 @@ node distance=1.3cm,
 	\end{tabular}
 \end{frame}
 
-%%9
+%%12
 \begin{frame}{Program logic}	
 	3 levels for the program logic\\~
 	\begin{itemize}
@@ -262,7 +278,7 @@ node distance=1.3cm,
 			\end{itemize}
 		\item<3-> For the \emph{basic blocks} $\vblock$
 			\begin{itemize}
-				\item unroll list of sequential instructions
+				\item process straight-line code within a block
 %				\item<5-> non-terminating semantic with $n$ steps \\ $n=$ number of instructions
 			\end{itemize}
 		\item<4-> For the program $\vprog$
@@ -290,6 +306,7 @@ node distance=1.3cm,
 		\end{figure}}
 \end{frame}
 
+%%13
 \begin{frame}{Rules for $\mathit{Terminal}$ and $\mathit{Next}$ blocks}
 	\[
 	\RuleC{\tblock{P}{\mathit{xs}}{Q}}
@@ -323,20 +340,21 @@ node distance=1.3cm,
 		R1 = ~& {\color{Data61 plum}\langle h \leq 1023 \wedge \color{Data61 plum}8 \leq g \rangle}~ \wedge^* 
 		{\color{Data61 dark mint}\texttt{continuing }} \wedge^*
 		{\color{Data61 ocean blue}\texttt{gas-pred g }} \wedge^*\\
-		&{\color{Data61 vermillion}\texttt{program-counter (n + size xs) }}\wedge^*\\
+		&{\color{Data61 vermillion}\texttt{pc (n + size xs) }}\wedge^*\\
 		&{\color{Data61 fuchsia}\texttt{stack-height (Suc h) }} \wedge^*
 		{\color{Data61 fuchsia}\texttt{stack h j }} \wedge^*
-		{\color{Data61 light forest}\texttt{rest}}\\
+		{\color{Data61 light forest}\texttt{F}}\\
 		R2 = ~&{\color{Data61 dark mint}\texttt{continuing }} \wedge^*
 		{\color{Data61 ocean blue}\texttt{gas-pred (g - 8) }} \wedge^*\\
-		&{\color{Data61 vermillion}\texttt{program-counter j }}\wedge^*
+		&{\color{Data61 vermillion}\texttt{pc j }}\wedge^*
 		{\color{Data61 fuchsia}\texttt{stack-height h }} \wedge^*
-		{\color{Data61 light forest}\texttt{rest}}
+		{\color{Data61 light forest}\texttt{F}}
 		\end{align*}
 	}
 	\uncover<3>{Conditional jumps (JUMPI) are treated similarly}
 \end{frame}
 
+%%15
 \begin{frame}{Rules for a basic block}
 	\[
 	\RuleC{\begin{array}{l}\tinstr{P}{x}{R} \\
@@ -352,13 +370,14 @@ node distance=1.3cm,
 		}
 \end{frame}
 
+%%16
 \begin{frame}{Example for an instruction}
 	Rule for ADD
 	\begin{align*}
 	\vinstr&\\
 	[&{\color<2>{Data61 plum}\langle h \leq 1023 \wedge 3 \leq g \rangle}~ \wedge^*\\
 	&{\color<3>{Data61 dark mint}\texttt{continuing }} \wedge^*
-	{\color<4>{Data61 vermillion}\texttt{program-counter n }} \wedge^*\\
+	{\color<4>{Data61 vermillion}\texttt{pc n }} \wedge^*\\
 	&{\color<5>{Data61 ocean blue}\texttt{gas-pred g }} \wedge^*
 	{\color<6>{Data61 fuchsia}\texttt{stack-height (Suc (Suc h)) }} \wedge^*\\
 	&{\color<6>{Data61 fuchsia}\texttt{stack (Suc h) a }} \wedge^*
@@ -367,7 +386,7 @@ node distance=1.3cm,
 	\\
 	(&\texttt{\textcolor<4>{Data61 vermillion}{n}, \textcolor<1>{Data61 light teal}{ADD}}) \\
 	[&{\color<3>{Data61 dark mint}\texttt{continuing }} \wedge^*
-	{\color<4>{Data61 vermillion}\texttt{program-counter (n + 1) }} \wedge^*\\
+	{\color<4>{Data61 vermillion}\texttt{pc (n + 1) }} \wedge^*\\
 	&{\color<5>{Data61 ocean blue}\texttt{gas-pred (g - 3) }} \wedge^*
 	{\color<6>{Data61 fuchsia}\texttt{stack-height (Suc h) }} \wedge^*\\
 	&{\color<6>{Data61 fuchsia}\texttt{stack h (a+b) }} \wedge^*
@@ -376,6 +395,7 @@ node distance=1.3cm,
 	\uncover<8>{Currently, 96/124 instructions specified}
 \end{frame}
 
+%%17
 \begin{frame}{Soundness}
 		\[
 		\RuleC{\begin{array}{l}
@@ -400,6 +420,7 @@ node distance=1.3cm,
 			\]}
 \end{frame}
 
+%%18
 \begin{frame}[fragile]{Case-study - Contract}
 Escrow smart contract allowing an arbiter to clear\\
 a transaction between two parties.\\
@@ -421,9 +442,10 @@ contract Escrow {
 	    }
 	    @\ldots@
 	\end{lstlisting}
-	\end{frame}
-	
-	\begin{frame}[fragile]{Contract}
+\end{frame}
+
+%%19	
+\begin{frame}[fragile]{Contract}
 		\begin{lstlisting}[language=Solidity]
 contract Escrow {
     @\ldots@
@@ -447,6 +469,7 @@ contract Escrow {
 		\end{lstlisting}
 \end{frame}
 
+%%20
 \begin{frame}[fragile]{Specification}
 \begin{lstlisting}[language=Isar,keywords={[3]{addfund\_hash,pay\_hash,refund\_hash,}}]{} 
 definition 
@@ -469,9 +492,10 @@ where
             else
               ContractFail [ShouldNotHappen])
 		\end{lstlisting}
-	\end{frame}
+\end{frame}
 	
-	\begin{frame}[fragile]{Specification}
+%%21
+\begin{frame}[fragile]{Specification}
 		\begin{lstlisting}[language=Isar,keywords={[3]{addfund\_hash,pay\_hash,refund\_hash,}}]{} 
 definition
   spec_amount :: [address, address, address, 256 word, 
@@ -486,6 +510,7 @@ where
 \end{lstlisting}	
 \end{frame}
 
+%%22
 \begin{frame}[fragile]{Correctness statement}
 	\begin{lstlisting}[language=Isar,keywords={[3]{hash,sender,buyer,seller,arbiter,amount,v}}]{}
 	theorem verify_escrow:
@@ -510,20 +535,25 @@ where
 	\end{lstlisting}
 \end{frame}
 
+%%23
 \begin{frame}{Automation}
+	Automated VCG driven by 
+	\begin{itemize}
+		\item block type at the program level
+		\item list construction at the block level
+	\end{itemize}
+	~\\
 	\centering
-	Syntaxic match to know which rule to apply
-	\\~\\
 	$\approx 40$ lines of proof for this example \\
 	$\approx 500$ lines of reusable
 	proof automation machinery
 \end{frame}
 
-%%19
+%%24
 \part{Future work}
 \frame{\partpage}
 
-%%20
+%%25
 \begin{frame}{Future work}
 	\begin{itemize}
 		\item Write \emph{sound} rules for all the instructions (36/70)
@@ -537,7 +567,7 @@ where
 \end{frame}
 
 
-%%22
+%%26
 \frame[plain]{\thankspage{}{\scriptsize myriam.begel@ens-paris-saclay.fr}{}
 	{Sidney Amani, Maksym Bortin, Mark Staples - \scriptsize Data61 (CSIRO)}
 	{\scriptsize\textit{Firstname.Lastname}@data61.csiro.au}}
@@ -545,6 +575,6 @@ where
 % \part \partpage not implemented yet
 % thanks/question page not implemented
 
-\bibliography{../bibli}
+%\bibliography{../bibli}
 
 \end{document}
