@@ -130,12 +130,7 @@ node distance=1.3cm,
 \part{Context}
 \frame{\partpage}
 
-%%3 
-\begin{frame}{Cost of smart contract bugs}
-	\includegraphics[scale=0.5]{Figures/intro.png}
-\end{frame}
-
-%%4
+%%3
 \begin{frame}{Ethereum}
 	%\begin{columns}[c]
 	%	\column{.6\textwidth}
@@ -149,6 +144,11 @@ node distance=1.3cm,
 	%	\column{.4\textwidth}
 		\centering\includegraphics[scale=0.2]{Figures/ETHEREUM-LOGO_PORTRAIT_Black_small.png}
 	%\end{columns}
+\end{frame}
+
+%%4
+\begin{frame}{Cost of smart contract bugs}
+	\includegraphics[scale=0.5]{Figures/intro.png}
 \end{frame}
 
 %%5
@@ -182,8 +182,8 @@ node distance=1.3cm,
 	    \item Our contributions:
 	    \begin{itemize}
 	    	\item Total correctness properties of contracts based on gas consumption
-	    	\item Sound program logic to derive such properties
 	    	\item Reasoning at the level of bytecode split into basic blocks
+	    	\item Sound program logic to derive such properties
 	    	\item Automation of verification condition generator
 	    \end{itemize}
 	\end{itemize}
@@ -375,7 +375,7 @@ node distance=1.3cm,
 	Rule for ADD
 	\begin{align*}
 	\vinstr&\\
-	[&{\color<2>{Data61 plum}\langle h \leq 1023 \wedge 3 \leq g \rangle}~ \wedge^*\\
+	[&{\color<2>{Data61 plum}\langle h \leq 1022 \wedge 3 \leq g \rangle}~ \wedge^*\\
 	&{\color<3>{Data61 dark mint}\texttt{continuing }} \wedge^*
 	{\color<4>{Data61 vermillion}\texttt{pc n }} \wedge^*\\
 	&{\color<5>{Data61 ocean blue}\texttt{gas-pred g }} \wedge^*
@@ -396,32 +396,32 @@ node distance=1.3cm,
 \end{frame}
 
 %%17
-\begin{frame}{Soundness}
-		\[
-		\RuleC{\begin{array}{l}
-			\tinstr{P}{x}{Q} \\
-			(P \sconj \code{[x]} \sconj F)\: s
-			\end{array}}
-		{(Q \sconj \code{[x]} \sconj F)\: \xnext(s)}
-		\]
-		~\\
-		\uncover<2->{	\[\RuleC{\begin{array}{l}
-				\tblock{P}{\mathit{xs}}{Q} \\
-				(P \sconj \code{\mathit{xs}} \sconj F)\: s
-				\end{array}}
-			{(Q \sconj \code{\mathit{xs}} \sconj F)\: \xnext^{\len{\mathit{xs}}}(s)}\]}
-		~\\
-		\uncover<3->{	\[
-			\RuleC{\begin{array}{l}
-				\tprog{\bblocks\: c}{P}{\fblock}{Q} \\
-				0 < \len{c} < 2^{256} 
-				\end{array}}
-			{\tvalid{P}{c}{Q}}
-			\]}
-\end{frame}
+%\begin{frame}{Soundness}
+%		\[
+%		\RuleC{\begin{array}{l}
+%			\tinstr{P}{x}{Q} \\
+%			(P \sconj \code{[x]} \sconj F)\: s
+%			\end{array}}
+%		{(Q \sconj \code{[x]} \sconj F)\: \xnext(s)}
+%		\]
+%		~\\
+%		\uncover<2->{	\[\RuleC{\begin{array}{l}
+%				\tblock{P}{\mathit{xs}}{Q} \\
+%				(P \sconj \code{\mathit{xs}} \sconj F)\: s
+%				\end{array}}
+%			{(Q \sconj \code{\mathit{xs}} \sconj F)\: \xnext^{\len{\mathit{xs}}}(s)}\]}
+%		~\\
+%		\uncover<3->{	\[
+%			\RuleC{\begin{array}{l}
+%				\tprog{\bblocks\: c}{P}{\fblock}{Q} \\
+%				0 < \len{c} < 2^{256} 
+%				\end{array}}
+%			{\tvalid{P}{c}{Q}}
+%			\]}
+%\end{frame}
 
 %%18
-\begin{frame}[fragile]{Case-study - Contract}
+\begin{frame}[fragile]{Case-study}
 Escrow smart contract allowing an arbiter to clear\\
 a transaction between two parties.\\
 		\begin{lstlisting}[language=Solidity]
@@ -544,6 +544,7 @@ where
 	\end{itemize}
 	~\\
 	\centering
+	191 EVM instructions \\
 	$\approx 40$ lines of proof for this example \\
 	$\approx 500$ lines of reusable
 	proof automation machinery
@@ -556,7 +557,7 @@ where
 %%25
 \begin{frame}{Future work}
 	\begin{itemize}
-		\item Write \emph{sound} rules for all the instructions (36/70)
+		\item Write \emph{sound} rules for all the instructions
 		\item Give more structure back (loops with heuristics)
 		\item Restore functions calls
 		\\~\\
