@@ -179,10 +179,10 @@ node distance=1.3cm,
 			\item Cannot match syntactically on program structure
 		\end{itemize}
 	
-	    \item Our contributions:
+	    \item<2-> Our contributions:
 	    \begin{itemize}
-	    	\item Total correctness properties of contracts based on gas consumption
-	    	\item Reasoning at the level of bytecode split into basic blocks
+	    	\item Total correctness properties of contracts based on \emph{gas} consumption
+	    	\item Reasoning at the level of bytecode split into \emph{basic blocks}
 	    	\item Sound program logic to derive such properties
 	    	\item Automation of verification condition generator
 	    \end{itemize}
@@ -212,14 +212,14 @@ node distance=1.3cm,
 %%9
 \begin{frame}{Termination of smart contracts}
 	\begin{itemize}
-		\item<1-> States with $\ncont$ are fixed-points of $\xnext$
-		\item<2-> Every execution ends up in a terminating state:
+		\item<1-> Every execution ends up in a terminating state:
 		\begin{itemize}
-			\item To invoke a contract, a gas budget is provided
-			\item EVM deducts a specified amount of gas for execution of each instruction
-			\item Hence any contract eventually reaches $\ncont$: 
+			\item<2-> To invoke a contract, a gas budget is provided
+			\item<3-> EVM deducts a specified amount of gas for execution of each instruction
+			\item<4-> Hence any contract eventually reaches $\ncont$: 
 			either normally or with the 'out-of-gas' exception
 		\end{itemize}
+		\item<5-> States with $\ncont$ are fixed-points of $\xnext$
 	\end{itemize}
 \end{frame}
 
@@ -276,7 +276,7 @@ node distance=1.3cm,
 				\item one rule per instruction
 %				\item<5-> non-terminating semantic with 1 step
 			\end{itemize}
-		\item<3-> For the \emph{basic blocks} $\vblock$
+		\item<3-> For the basic blocks $\vblock$
 			\begin{itemize}
 				\item process straight-line code within a block
 %				\item<5-> non-terminating semantic with $n$ steps \\ $n=$ number of instructions
@@ -337,21 +337,21 @@ node distance=1.3cm,
 	\]
 	\uncover<2->{
 		\begin{align*}
-		R1 = ~& {\color{Data61 plum}\langle h \leq 1023 \wedge \color{Data61 plum}8 \leq g \rangle}~ \wedge^* 
-		{\color{Data61 dark mint}\texttt{continuing }} \wedge^*
-		{\color{Data61 ocean blue}\texttt{gas-pred g }} \wedge^*\\
-		&{\color{Data61 vermillion}\texttt{pc (n + size xs) }}\wedge^*\\
-		&{\color{Data61 fuchsia}\texttt{stack-height (Suc h) }} \wedge^*
-		{\color{Data61 fuchsia}\texttt{stack h j }} \wedge^*
-		{\color{Data61 light forest}\texttt{F}}\\
-		R2 = ~&{\color{Data61 dark mint}\texttt{continuing }} \wedge^*
-		{\color{Data61 ocean blue}\texttt{gas-pred (g - 8) }} \wedge^*\\
-		&{\color{Data61 vermillion}\texttt{pc j }}\wedge^*
-		{\color{Data61 fuchsia}\texttt{stack-height h }} \wedge^*
-		{\color{Data61 light forest}\texttt{F}}
+		R_1 = ~& {\color<2>{Data61 plum}\langle h \leq 1023 \wedge \color<2>{Data61 plum}8 \leq g \rangle}~ \wedge^* 
+		{\color<3>{Data61 dark mint}\texttt{continuing }} \wedge^*
+		{\color<4>{Data61 ocean blue}\texttt{gas-pred g }} \wedge^*\\
+		&{\color<5>{Data61 vermillion}\texttt{pc (n + size xs) }}\wedge^*\\
+		&{\color<6>{Data61 fuchsia}\texttt{stack-height (Suc h) }} \wedge^*
+		{\color<6>{Data61 fuchsia}\texttt{stack h j }} \wedge^*
+		{\color<7>{Data61 light forest}\texttt{F}}\\
+		R_2 = ~&{\color<3>{Data61 dark mint}\texttt{continuing }} \wedge^*
+		{\color<4>{Data61 ocean blue}\texttt{gas-pred (g - 8) }} \wedge^*\\
+		&{\color<5>{Data61 vermillion}\texttt{pc j }}\wedge^*
+		{\color<6>{Data61 fuchsia}\texttt{stack-height h }} \wedge^*
+		{\color<7>{Data61 light forest}\texttt{F}}
 		\end{align*}
 	}
-	\uncover<3>{Conditional jumps (JUMPI) are treated similarly}
+	\uncover<8>{Conditional jumps (JUMPI) are treated similarly}
 \end{frame}
 
 %%15
