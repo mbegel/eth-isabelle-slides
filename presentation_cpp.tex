@@ -127,7 +127,7 @@ node distance=1.3cm,
 
 
 %%2
-\part{Context}
+\part{Background}
 \frame{\partpage}
 
 %%3
@@ -138,7 +138,7 @@ node distance=1.3cm,
 			\item Decentralised platform (\emph{blockchain}) to run smart contracts, Turing-complete programs
 			\item Smart contracts can receive/transfer cryptocurrency (e.g. \emph{ether})
 			\item Smart contracts run by the \emph{Ethereum Virtual Machine}
-			\item Critical use for: voting, pharmaceutical supply chains, electrical power grids
+			\item Critical use for: voting, pharmaceutical supply chains, electrical power grids, etc
 			\item No central authority
 		\end{itemize}
 	%	\column{.4\textwidth}
@@ -195,7 +195,7 @@ node distance=1.3cm,
 
 %%8
 \begin{frame}{Partial correctness statements}
-	$\xnext$ = single machine step performing instruction at the current pc
+	$\xnext$ = single machine step performing instruction at the current program counter
 	\\~\\
 	\begin{center}
 			$\pvalid{P}{c}{Q}$ iff \\
@@ -214,7 +214,7 @@ node distance=1.3cm,
 	\begin{itemize}
 		\item<1-> Every execution ends up in a terminating state:
 		\begin{itemize}
-			\item<2-> To invoke a contract, a gas budget is provided
+			\item<2-> To invoke a contract, a gas budget must be provided
 			\item<3-> EVM deducts a specified amount of gas for execution of each instruction
 			\item<4-> Hence any contract eventually reaches $\ncont$: 
 			either normally or with the 'out-of-gas' exception
@@ -371,8 +371,7 @@ node distance=1.3cm,
 \end{frame}
 
 %%16
-\begin{frame}{Example for an instruction}
-	Rule for ADD
+\begin{frame}{Rule for an instruction - ADD}
 	\begin{align*}
 	\vinstr&\\
 	[&{\color<2>{Data61 plum}\langle h \leq 1022 \wedge 3 \leq g \rangle}~ \wedge^*\\
@@ -392,7 +391,7 @@ node distance=1.3cm,
 	&{\color<6>{Data61 fuchsia}\texttt{stack h (a+b) }} \wedge^*
 	{\color<7>{Data61 light forest}\texttt{F}}]
 	\end{align*}
-	\uncover<8>{Currently, 96/124 instructions specified}
+	\uncover<8>{Currently, 96 of the 124 instructions specified}
 \end{frame}
 
 %%17
@@ -421,7 +420,7 @@ node distance=1.3cm,
 %\end{frame}
 
 %%18
-\begin{frame}[fragile]{Case-study}
+\begin{frame}[fragile]{Case study}
 Escrow smart contract allowing an arbiter to clear\\
 a transaction between two parties.\\
 		\begin{lstlisting}[language=Solidity]
@@ -541,6 +540,7 @@ where
 	\begin{itemize}
 		\item block type at the program level
 		\item list construction at the block level
+		\item instruction at the instruction level
 	\end{itemize}
 	~\\
 	\centering
