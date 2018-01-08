@@ -136,10 +136,11 @@ node distance=1.3cm,
 	%	\column{.6\textwidth}
 		\begin{itemize}
 			\item Decentralised platform (\emph{blockchain}) to run smart contracts, Turing-complete programs
-			\item Smart contracts can receive/transfer cryptocurrency (e.g. \emph{ether})
-			\item Smart contracts run by the \emph{Ethereum Virtual Machine}
-			\item Critical use for: voting, pharmaceutical supply chains, electrical power grids, etc
 			\item No central authority
+			\item Inter-contract calls
+			\item Smart contracts run by the \emph{Ethereum Virtual Machine}
+			\item Smart contracts can receive/transfer cryptocurrency (e.g. \emph{ether})
+			\item Critical use for: voting, pharmaceutical supply chains, electrical power grids, etc
 		\end{itemize}
 	%	\column{.4\textwidth}
 		\centering\includegraphics[scale=0.2]{Figures/ETHEREUM-LOGO_PORTRAIT_Black_small.png}
@@ -160,10 +161,10 @@ node distance=1.3cm,
 			\item Memory: temporary variables
 			\item Storage: persistent variables
 			\item Environment variables
-			\item Inter-contract calls
-			\item High-level languages:
-			Solidity, Viper, LLL, etc
 		\end{itemize}
+		~\\
+		High-level languages:\\
+		Solidity, Viper, LLL, etc
 		\column{.4\textwidth}
 		\includegraphics[scale=0.3]{Figures/evm.eps}
 	\end{columns}
@@ -241,7 +242,7 @@ node distance=1.3cm,
 
 %%11
 \begin{frame}{Basic block}
-	Maximum block of straight-line code - Jumps are removed
+	Maximum block of straight-line code minus jumps
 	\\~\\
 	\centering
 	\begin{tabular}{c !{\color{black}\vrule} r l !{\color{black}\vrule} c}
@@ -322,7 +323,9 @@ node distance=1.3cm,
 		\tprog{blocks}{\pc\;\textcolor<3->{Data61 vermillion}{m} \sconj R}{(\textcolor<3->{Data61 vermillion}{m}, \mathit{ys},t)}{Q}
 		\end{array}}
 	{\tprog{blocks}{P}{(n, \mathit{xs}, \mathit{Next})}{Q}}
-	\]}
+	\]
+	~\\~\\
+	\small{$\pc=$ program counter = address of the current instruction}}
 \end{frame}
 
 %%14
@@ -395,29 +398,29 @@ node distance=1.3cm,
 \end{frame}
 
 %%17
-%\begin{frame}{Soundness}
-%		\[
-%		\RuleC{\begin{array}{l}
-%			\tinstr{P}{x}{Q} \\
-%			(P \sconj \code{[x]} \sconj F)\: s
-%			\end{array}}
-%		{(Q \sconj \code{[x]} \sconj F)\: \xnext(s)}
-%		\]
-%		~\\
-%		\uncover<2->{	\[\RuleC{\begin{array}{l}
-%				\tblock{P}{\mathit{xs}}{Q} \\
-%				(P \sconj \code{\mathit{xs}} \sconj F)\: s
-%				\end{array}}
-%			{(Q \sconj \code{\mathit{xs}} \sconj F)\: \xnext^{\len{\mathit{xs}}}(s)}\]}
-%		~\\
-%		\uncover<3->{	\[
-%			\RuleC{\begin{array}{l}
-%				\tprog{\bblocks\: c}{P}{\fblock}{Q} \\
-%				0 < \len{c} < 2^{256} 
-%				\end{array}}
-%			{\tvalid{P}{c}{Q}}
-%			\]}
-%\end{frame}
+\begin{frame}{Soundness}
+		\[
+		\RuleC{\begin{array}{l}
+			\tinstr{P}{x}{Q} \\
+			(P \sconj \code{[x]} \sconj F)\: s
+			\end{array}}
+		{(Q \sconj \code{[x]} \sconj F)\: \xnext(s)}
+		\]
+		~\\
+		\uncover<2->{	\[\RuleC{\begin{array}{l}
+				\tblock{P}{\mathit{xs}}{Q} \\
+				(P \sconj \code{\mathit{xs}} \sconj F)\: s
+				\end{array}}
+			{(Q \sconj \code{\mathit{xs}} \sconj F)\: \xnext^{\len{\mathit{xs}}}(s)}\]}
+		~\\
+		\uncover<3->{	\[
+			\RuleC{\begin{array}{l}
+				\tprog{\bblocks\: c}{P}{\fblock}{Q} \\
+				0 < \len{c} < 2^{256} 
+				\end{array}}
+			{\tvalid{P}{c}{Q}}
+			\]}
+\end{frame}
 
 %%18
 \begin{frame}[fragile]{Case study}
@@ -450,18 +453,18 @@ contract Escrow {
     @\ldots@
     function addfund() payable public {
 		@\label{lst:addfundbeg}@        require (amount > 0 &&
-        msg.value == amount &&
+                 msg.value == amount &&
 		@\label{lst:addfundsender}@                 msg.sender == buyer);
 		@\label{lst:addfundend}@        amount = 0;
     }
     function refund() public {
 		@\label{lst:refundbeg}@        require (amount == 0 &&
-        msg.sender == arbiter);
+                 msg.sender == arbiter);
 		@\label{lst:refundend}@        selfdestruct(buyer);
     }
     function pay() public {
 		@\label{lst:paybeg}@        require (amount == 0 &&
-        msg.sender == arbiter);
+                 msg.sender == arbiter);
 		@\label{lst:payend}@        selfdestruct(seller);
     }
 }
@@ -562,7 +565,7 @@ where
 		\item Restore functions calls
 		\\~\\
 		\begin{itemize}
-			\item Proposal for EVM 1.5: static jumps and explicit function calls
+			\item<2> Proposal for EVM 1.5: static jumps and explicit function calls
 		\end{itemize}
 	\end{itemize}
 \end{frame}
